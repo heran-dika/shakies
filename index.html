@@ -151,6 +151,27 @@
     transform:translateY(2px);
     box-shadow:0 1px 0 var(--pill-shadow);
   }
+  .link-btn.highlight{
+    position:relative;
+    animation: breatheOut 1.8s ease-out infinite;
+  }
+  @keyframes breatheOut{
+    0%{ box-shadow:0 3px 0 var(--pill-shadow), 0 0 0 0 rgba(31,56,100,0.4); }
+    100%{ box-shadow:0 3px 0 var(--pill-shadow), 0 0 16px 8px rgba(31,56,100,0); }
+  }
+  .badge-tag{
+    position:absolute;
+    top:-8px;
+    right:14px;
+    background:var(--navy);
+    color:var(--white);
+    font-size:0.65rem;
+    font-weight:700;
+    letter-spacing:.02em;
+    padding:2px 9px;
+    border-radius:10px;
+    box-shadow:0 2px 4px rgba(31,56,100,0.3);
+  }
   .icon-badge{
     flex:0 0 auto;
     width:42px; height:42px;
@@ -203,6 +224,15 @@
   </div>
 
   <div class="links">
+
+    <a class="link-btn highlight" data-umami-event="click_todays_menu" href="https://heran-dika.github.io/shakies-pos/menu" target="_blank" rel="noopener">
+      <span class="badge-tag">Limited</span>
+      <span class="icon-badge"><span class="emoji">📋</span></span>
+      <span class="link-text">
+        <span class="title">Today's Menu</span>
+        <span class="desc">Stok terbatas & berubah tiap hari — cek dulu sebelum kehabisan!</span>
+      </span>
+    </a>
 
     <a class="link-btn" data-umami-event="click_whatsapp_order" href="https://www.whatsapp.com/catalog/6287856857217/" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">💬</span></span>

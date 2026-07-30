@@ -31,56 +31,78 @@
     background: var(--bg);
     position:relative;
   }
-  .header{
+
+  /* ===== HERO (day/night crossfade) ===== */
+  .hero{
     position:relative;
-    height:150px;
-    background:
-      repeating-linear-gradient(45deg, rgba(31,56,100,0.05) 0 2px, transparent 2px 14px),
-      linear-gradient(180deg, #f6c9c9, #fbe2e2);
+    width:100%;
+    aspect-ratio: 750 / 1004;
     overflow:hidden;
   }
-  .header svg.pattern{
-    position:absolute; inset:0; opacity:0.18;
+  .hero img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
   }
-  .profile{
-    text-align:center;
-    padding: 0 20px 18px;
-    margin-top:-64px;
-  }
-  .avatar{
-    position:relative;
-    z-index:2;
-    width:120px;
-    height:120px;
+  .hero .img-day{ z-index:1; }
+  .hero .img-night{ z-index:2; opacity:0; transition:opacity 3s ease; }
+  .hero.night .img-night{ opacity:1; }
+
+  /* Tombol toggle siang/malam, icon bulat pojok kanan atas */
+  .daynight-toggle{
+    position:absolute;
+    top:16px;
+    right:16px;
+    z-index:5;
+    width:42px;
+    height:42px;
     border-radius:50%;
-    border:5px solid var(--white);
-    box-shadow:0 4px 14px rgba(31,56,100,0.18);
-    background-color:#fdf0f0;
-    background-image:url('assets/avatar.png');
-    background-size:contain;
-    background-position:center;
-    background-repeat:no-repeat;
-    margin:0 auto 14px;
+    border:none;
+    background:rgba(255,255,255,0.9);
+    box-shadow:0 2px 8px rgba(31,56,100,0.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:20px;
+    padding:0;
+  }
+  .daynight-toggle:active{ transform:scale(0.94); }
+
+  /* Card welcome melayang di atas hero */
+  .welcome-card{
+    position:absolute;
+    top:16px;
+    left:16px;
+    right:70px; /* kasih ruang buat tombol toggle */
+    z-index:4;
+    background:rgba(253,240,240,0.92);
+    border-radius:18px;
+    padding:14px 16px;
+    text-align:center;
+    box-shadow:0 4px 14px rgba(31,56,100,0.15);
   }
   h1{
-    font-size:1.3rem;
+    font-size:1.15rem;
     margin:0 0 4px;
     color:var(--navy);
     font-weight:700;
   }
   .subtitle{
-    margin:0 0 18px;
+    margin:0 0 14px;
     color:var(--navy-soft);
-    font-size:0.95rem;
+    font-size:0.85rem;
   }
   .social-row{
     display:flex;
     justify-content:center;
-    gap:16px;
-    margin-bottom:6px;
+    gap:12px;
   }
   .social-row a{
-    width:44px; height:44px;
+    width:38px; height:38px;
     border-radius:50%;
     background:var(--white);
     display:flex; align-items:center; justify-content:center;
@@ -88,12 +110,15 @@
     color:var(--navy);
     transition:transform .15s ease;
   }
+  .social-row a svg{ width:18px; height:18px; }
   .social-row a:active{ transform:scale(0.92); }
+
+  /* ===== LINKS ===== */
   .links{
     display:flex;
     flex-direction:column;
     gap:14px;
-    padding: 6px 18px 40px;
+    padding: 20px 18px 40px;
   }
   .link-btn{
     display:flex;
@@ -120,6 +145,7 @@
     box-shadow:0 1px 4px rgba(31,56,100,0.15);
   }
   .icon-badge svg{ width:22px; height:22px; }
+  .icon-badge .emoji{ font-size:22px; line-height:1; }
   .link-text{ text-align:center; flex:1; }
   .link-text .title{ font-weight:700; font-size:1rem; display:block; }
   .link-text .desc{ font-size:0.8rem; color:var(--navy-soft); display:block; margin-top:2px; }
@@ -135,35 +161,36 @@
 <body>
 <div class="page">
 
-  <div class="header"></div>
+  <div class="hero" id="hero">
+    <img class="img-day" src="assets/shakies-day.jpg" alt="Shakies cafe siang">
+    <img class="img-night" src="assets/shakies-night.jpg" alt="Shakies cafe malam">
 
-  <div class="profile">
-    <div class="avatar" role="img" aria-label="Shakies logo"></div>
-    <h1>Welcome ShakiesLovers!</h1>
-    <p class="subtitle">Explore our virtual space</p>
+    <button class="daynight-toggle" id="toggleBtn" aria-label="Ubah suasana siang/malam">🌙</button>
 
-    <div class="social-row">
-      <a href="https://wa.me/6287856857217?text=Hi%20Shakies,%20saya%20dengan..." aria-label="WhatsApp" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/><path d="M8.5 8.5c0 4 3 7 7 7"/></svg>
-      </a>
-      <a href="https://www.instagram.com/shakies_co" aria-label="Instagram" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="0.8" fill="currentColor" stroke="none"/></svg>
-      </a>
-      <a href="https://www.tiktok.com/@shakies_co" aria-label="TikTok" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3v10.5a3.5 3.5 0 1 1-2.5-3.35"/><path d="M14 3c0 2.5 2 4.5 4.5 4.5"/></svg>
-      </a>
-      <a href="https://www.threads.net/@shakies_co" aria-label="Threads" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3c4 0 7 2.5 7 8s-2.5 8-7 8-6.5-2-6.5-5c0-3 3-4 6-4 1.7 0 3 .3 4 .8"/></svg>
-      </a>
+    <div class="welcome-card">
+      <h1>Welcome ShakiesLovers!</h1>
+      <p class="subtitle">Explore our virtual space</p>
+      <div class="social-row">
+        <a href="https://wa.me/6287856857217?text=Hi%20Shakies,%20saya%20dengan..." aria-label="WhatsApp" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3Z"/><path d="M8.5 8.5c0 4 3 7 7 7"/></svg>
+        </a>
+        <a href="https://www.instagram.com/shakies_co" aria-label="Instagram" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="0.8" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@shakies_co" aria-label="TikTok" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3v10.5a3.5 3.5 0 1 1-2.5-3.35"/><path d="M14 3c0 2.5 2 4.5 4.5 4.5"/></svg>
+        </a>
+        <a href="https://www.threads.net/@shakies_co" aria-label="Threads" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3c4 0 7 2.5 7 8s-2.5 8-7 8-6.5-2-6.5-5c0-3 3-4 6-4 1.7 0 3 .3 4 .8"/></svg>
+        </a>
+      </div>
     </div>
   </div>
 
   <div class="links">
 
     <a class="link-btn" href="https://www.whatsapp.com/catalog/6287856857217/" target="_blank" rel="noopener">
-      <span class="icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1f3864" stroke-width="1.8"><path d="M5 4h14v13H8l-3 3V4Z"/><path d="M8 9h8M8 13h5"/></svg>
-      </span>
+      <span class="icon-badge"><span class="emoji">💬</span></span>
       <span class="link-text">
         <span class="title">Whatsapp Order</span>
         <span class="desc">Please confirm your order and stock availability before making payment. Thank you!</span>
@@ -171,9 +198,7 @@
     </a>
 
     <a class="link-btn" href="https://www.instagram.com/p/DMe2Zx1vgxr/?igsh=NW5hZjB6c2VpdXk5" target="_blank" rel="noopener">
-      <span class="icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1f3864" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 10c0-.5.5-1 1-1s1 .5 1 1M13 10c0-.5.5-1 1-1s1 .5 1 1"/><path d="M8.5 14c1 1.5 6 1.5 7 0"/></svg>
-      </span>
+      <span class="icon-badge"><span class="emoji">😊</span></span>
       <span class="link-text">
         <span class="title">Reheat Instruction</span>
         <span class="desc">Warm is more delicious</span>
@@ -181,9 +206,7 @@
     </a>
 
     <a class="link-btn" href="https://heran-dika.github.io/Shakies-Recipe/landing.html" target="_blank" rel="noopener">
-      <span class="icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1f3864" stroke-width="1.8"><path d="M7 3c-1.5 1.5-1.5 4 0 5.5M12 3c-1.5 1.5-1.5 4 0 5.5M17 3c-1.5 1.5-1.5 4 0 5.5"/><path d="M6 9h12l-1.5 12h-9L6 9Z"/></svg>
-      </span>
+      <span class="icon-badge"><span class="emoji">🍵</span></span>
       <span class="link-text">
         <span class="title">Kitchen Lab</span>
         <span class="desc">Sharing delicious recipe ala shakies</span>
@@ -191,9 +214,7 @@
     </a>
 
     <a class="link-btn" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">
-      <span class="icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1f3864" stroke-width="1.8"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
-      </span>
+      <span class="icon-badge"><span class="emoji">📍</span></span>
       <span class="link-text">
         <span class="title">Pick up Location</span>
         <span class="desc">Currently, only delivery is available. Here's the map location for pick up delivery.</span>
@@ -201,9 +222,7 @@
     </a>
 
     <a class="link-btn" href="https://g.page/r/CTp32r1466QKEBM/review" target="_blank" rel="noopener">
-      <span class="icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1f3864" stroke-width="1.8"><path d="M12 3l2.6 5.6 6 .7-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6L3.4 9.3l6-.7L12 3Z"/></svg>
-      </span>
+      <span class="icon-badge"><span class="emoji">⭐</span></span>
       <span class="link-text">
         <span class="title">Write Review on Google Maps</span>
         <span class="desc">You like our food, please tell everyone.</span>
@@ -211,9 +230,7 @@
     </a>
 
     <a class="link-btn" href="https://food.grab.com/id/en/restaurant/shakies-galaxy-bekasi-blok-d2-no-11a-jl-lotus-raya-delivery/6-C7JEAPCDN3WXGJ?sourceID=20250627_102808_f15f347fb7114195836b30c1d3a736f1_MEXMPS" target="_blank" rel="noopener">
-      <span class="icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1f3864" stroke-width="1.8"><rect x="4" y="9" width="16" height="9" rx="2"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></svg>
-      </span>
+      <span class="icon-badge"><span class="emoji">👜</span></span>
       <span class="link-text">
         <span class="title">Grab Food</span>
         <span class="desc">Craving our fresh baked? Check our promo here..</span>
@@ -221,9 +238,7 @@
     </a>
 
     <a class="link-btn" href="https://gofood.co.id/bekasi/restaurant/shakies-61134f0b-29b8-4972-a205-8570f6677b2e" target="_blank" rel="noopener">
-      <span class="icon-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1f3864" stroke-width="1.8"><path d="M4 12h16M6 12l3-6h6l3 6"/><circle cx="8" cy="17" r="1.6"/><circle cx="16" cy="17" r="1.6"/></svg>
-      </span>
+      <span class="icon-badge"><span class="emoji">🛒</span></span>
       <span class="link-text">
         <span class="title">gofood</span>
         <span class="desc">Tap away to order freshly baked bread and cookies</span>
@@ -235,5 +250,18 @@
   <footer>© Shakies — Food · Cookies · Drinks</footer>
 
 </div>
+
+<script>
+  const hero = document.getElementById('hero');
+  const btn = document.getElementById('toggleBtn');
+  let isNight = false;
+
+  btn.addEventListener('click', () => {
+    isNight = !isNight;
+    hero.classList.toggle('night', isNight);
+    btn.textContent = isNight ? '☀️' : '🌙';
+  });
+</script>
+
 </body>
 </html>

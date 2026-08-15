@@ -192,6 +192,84 @@
     opacity:0.7;
     padding-bottom:24px;
   }
+
+  /* ===== MENU SHEET (kertas nongol dari bawah) ===== */
+  .sheet-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(31,56,100,0.45);
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .25s ease, visibility .25s ease;
+    z-index:50;
+  }
+  .sheet-overlay.open{
+    opacity:1;
+    visibility:visible;
+  }
+  .menu-sheet{
+    position:fixed;
+    left:50%;
+    bottom:0;
+    width:100%;
+    max-width:480px;
+    height:88vh;
+    background:var(--bg);
+    border-radius:20px 20px 0 0;
+    box-shadow:0 -8px 30px rgba(31,56,100,0.35);
+    transform:translate(-50%, 100%) rotate(1.2deg);
+    transition:transform .45s cubic-bezier(.22,1,.36,1);
+    z-index:51;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .menu-sheet.open{
+    transform:translate(-50%, 0) rotate(0deg);
+  }
+  .sheet-handle{
+    width:40px;
+    height:4px;
+    background:var(--pill-shadow);
+    border-radius:2px;
+    margin:10px auto 0;
+    flex:0 0 auto;
+  }
+  .sheet-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 16px 12px;
+    flex:0 0 auto;
+  }
+  .sheet-header-text .sheet-title{
+    font-weight:700;
+    font-size:1rem;
+    display:block;
+  }
+  .sheet-header-text .sheet-newtab{
+    font-size:0.75rem;
+    color:var(--navy-soft);
+  }
+  .sheet-close{
+    border:none;
+    background:var(--pill);
+    color:var(--navy);
+    width:32px;height:32px;
+    border-radius:50%;
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    box-shadow:0 2px 0 var(--pill-shadow);
+    flex:0 0 auto;
+  }
+  .sheet-close:active{ transform:translateY(1px); box-shadow:none; }
+  .menu-sheet iframe{
+    flex:1 1 auto;
+    width:100%;
+    border:none;
+    background:var(--white);
+  }
 </style>
 </head>
 <body>
@@ -225,7 +303,7 @@
 
   <div class="links">
 
-    <a class="link-btn highlight" data-umami-event="click_todays_menu" href="https://heran-dika.github.io/shakies-pos/menu" target="_blank" rel="noopener">
+    <a class="link-btn highlight" id="todaysMenuBtn" data-umami-event="click_todays_menu" href="https://heran-dika.github.io/shakies-pos/menu" rel="noopener">
       <span class="badge-tag">Limited</span>
       <span class="icon-badge"><span class="emoji">📋</span></span>
       <span class="link-text">
@@ -294,6 +372,19 @@
 
   <footer>© Shakies — Food · Cookies · Drinks</footer>
 
+  <div class="sheet-overlay" id="menuSheetOverlay"></div>
+  <div class="menu-sheet" id="menuSheet" role="dialog" aria-modal="true" aria-label="Today's Menu">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-header-text">
+        <span class="sheet-title">Today's Menu</span>
+        <a class="sheet-newtab" id="menuSheetNewTab" href="https://heran-dika.github.io/shakies-pos/menu" target="_blank" rel="noopener">Buka di tab baru ↗</a>
+      </div>
+      <button class="sheet-close" id="menuSheetClose" aria-label="Tutup">✕</button>
+    </div>
+    <iframe id="menuSheetFrame" title="Today's Menu"></iframe>
+  </div>
+
 </div>
 
 <script>
@@ -306,6 +397,41 @@
     hero.classList.toggle('night', isNight);
     btn.textContent = isNight ? '☀️' : '🌙';
   });
+
+  // ===== Today's Menu sheet (kertas nongol dari bawah) =====
+  (function(){
+    const MENU_URL = "https://heran-dika.github.io/shakies-pos/menu";
+    const menuBtn = document.getElementById('todaysMenuBtn');
+    const overlay = document.getElementById('menuSheetOverlay');
+    const sheet = document.getElementById('menuSheet');
+    const closeBtn = document.getElementById('menuSheetClose');
+    const frame = document.getElementById('menuSheetFrame');
+    let loaded = false;
+
+    function openSheet(){
+      if(!loaded){ frame.src = MENU_URL; loaded = true; }
+      overlay.classList.add('open');
+      sheet.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSheet(){
+      overlay.classList.remove('open');
+      sheet.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    menuBtn.addEventListener('click', (e) => {
+      // biarin ctrl/cmd/shift/middle-click tetap buka tab baru manual
+      if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+      e.preventDefault();
+      openSheet();
+    });
+    overlay.addEventListener('click', closeSheet);
+    closeBtn.addEventListener('click', closeSheet);
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') closeSheet();
+    });
+  })();
 </script>
 
 </body>

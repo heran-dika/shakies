@@ -193,7 +193,7 @@
     padding-bottom:24px;
   }
 
-  /* ===== MENU SHEET (kertas nongol dari bawah) ===== */
+  /* ===== MENU SHEET (kertas nongol dari bawah, isinya menu.html lokal) ===== */
   .sheet-overlay{
     position:fixed;
     inset:0;
@@ -213,12 +213,12 @@
     bottom:0;
     width:100%;
     max-width:480px;
-    height:88vh;
+    height:90vh;
     background:var(--bg);
     border-radius:20px 20px 0 0;
     box-shadow:0 -8px 30px rgba(31,56,100,0.35);
     transform:translate(-50%, 100%) rotate(1.2deg);
-    transition:transform .45s cubic-bezier(.22,1,.36,1);
+    transition:transform .42s cubic-bezier(.22,1,.36,1);
     z-index:51;
     display:flex;
     flex-direction:column;
@@ -303,7 +303,7 @@
 
   <div class="links">
 
-    <a class="link-btn highlight" id="todaysMenuBtn" data-umami-event="click_todays_menu" href="https://heran-dika.github.io/shakies-pos/menu" rel="noopener">
+    <a class="link-btn highlight" id="todaysMenuBtn" data-umami-event="click_todays_menu" href="menu.html" target="_blank" rel="noopener">
       <span class="badge-tag">Limited</span>
       <span class="icon-badge"><span class="emoji">📋</span></span>
       <span class="link-text">
@@ -378,7 +378,7 @@
     <div class="sheet-header">
       <div class="sheet-header-text">
         <span class="sheet-title">Today's Menu</span>
-        <a class="sheet-newtab" id="menuSheetNewTab" href="https://heran-dika.github.io/shakies-pos/menu" target="_blank" rel="noopener">Buka di tab baru ↗</a>
+        <a class="sheet-newtab" id="menuSheetNewTab" href="menu.html" target="_blank" rel="noopener">Buka di tab baru ↗</a>
       </div>
       <button class="sheet-close" id="menuSheetClose" aria-label="Tutup">✕</button>
     </div>
@@ -398,9 +398,9 @@
     btn.textContent = isNight ? '☀️' : '🌙';
   });
 
-  // ===== Today's Menu sheet (kertas nongol dari bawah) =====
+  // ===== Today's Menu sheet (kertas nongol dari bawah, iframe menu.html lokal - sama scope, no PWA capturing) =====
   (function(){
-    const MENU_URL = "https://heran-dika.github.io/shakies-pos/menu";
+    const MENU_URL = "menu.html";
     const menuBtn = document.getElementById('todaysMenuBtn');
     const overlay = document.getElementById('menuSheetOverlay');
     const sheet = document.getElementById('menuSheet');

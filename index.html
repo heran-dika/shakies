@@ -268,6 +268,53 @@
     border:none;
     background:var(--white);
   }
+
+  /* ===== LIGHTBOX (popup gambar Reheat Instruction) ===== */
+  .lightbox-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(31,56,100,0.72);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .2s ease, visibility .2s ease;
+    z-index:60;
+  }
+  .lightbox-overlay.open{
+    opacity:1;
+    visibility:visible;
+  }
+  .lightbox-inner{
+    position:relative;
+    max-width:100%;
+    max-height:100%;
+  }
+  .lightbox-inner img{
+    display:block;
+    max-width:100%;
+    max-height:80vh;
+    border-radius:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.4);
+  }
+  .lightbox-close{
+    position:absolute;
+    top:-14px;
+    right:-14px;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    border:none;
+    background:var(--navy);
+    color:var(--white);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,0.35);
+  }
+  .lightbox-close:active{ transform:scale(0.94); }
 </style>
 </head>
 <body>
@@ -318,7 +365,7 @@
       </span>
     </a>
 
-    <a class="link-btn" data-umami-event="click_reheat_instruction" href="https://www.instagram.com/p/DMe2Zx1vgxr/?igsh=NW5hZjB6c2VpdXk5" target="_blank" rel="noopener">
+    <a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="assets/reheat-instruction.png" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">😊</span></span>
       <span class="link-text">
         <span class="title">Reheat Instruction</span>
@@ -380,6 +427,13 @@
       <button class="sheet-close" id="menuSheetClose" aria-label="Tutup">✕</button>
     </div>
     <iframe id="menuSheetFrame" title="Today's Menu"></iframe>
+  </div>
+
+  <div class="lightbox-overlay" id="reheatOverlay">
+    <div class="lightbox-inner">
+      <button class="lightbox-close" id="reheatClose" aria-label="Tutup">✕</button>
+      <img src="assets/reheat-instruction.png" alt="Reheat Instruction">
+    </div>
   </div>
 
 </div>
@@ -474,6 +528,36 @@
       history.replaceState(null, '', location.pathname);
       window.addEventListener('load', () => setTimeout(openSheet, 350));
     }
+  })();
+
+  // ===== Reheat Instruction lightbox (popup gambar, bukan buka tab IG) =====
+  (function(){
+    const reheatBtn = document.getElementById('reheatBtn');
+    const reheatOverlay = document.getElementById('reheatOverlay');
+    const reheatClose = document.getElementById('reheatClose');
+
+    function openReheat(){
+      reheatOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeReheat(){
+      reheatOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    reheatBtn.addEventListener('click', (e) => {
+      // ctrl/cmd/shift/middle-click tetap buka gambar di tab baru manual
+      if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+      e.preventDefault();
+      openReheat();
+    });
+    reheatOverlay.addEventListener('click', (e) => {
+      if(e.target === reheatOverlay) closeReheat(); // klik bg gelap = nutup
+    });
+    reheatClose.addEventListener('click', closeReheat);
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') closeReheat();
+    });
   })();
 </script>
 

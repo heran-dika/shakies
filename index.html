@@ -269,6 +269,97 @@
     border:none;
     background:var(--white);
   }
+
+  /* ===== LIGHTBOX (popup gambar Reheat Instruction) ===== */
+  .lightbox-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(31,56,100,0.72);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .2s ease, visibility .2s ease;
+    z-index:60;
+  }
+  .lightbox-overlay.open{
+    opacity:1;
+    visibility:visible;
+  }
+  .lightbox-inner{
+    position:relative;
+    max-width:100%;
+    max-height:100%;
+  }
+  .lightbox-inner img{
+    display:block;
+    max-width:100%;
+    max-height:80vh;
+    border-radius:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.4);
+  }
+  .lightbox-close{
+    position:absolute;
+    top:-14px;
+    right:-14px;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    border:none;
+    background:var(--navy);
+    color:var(--white);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,0.35);
+  }
+  .lightbox-close:active{ transform:scale(0.94); }
+
+  /* ===== MAP LIGHTBOX (popup peta Pick up Location, bisa digeser/zoom) ===== */
+  .map-lightbox-inner{
+    position:relative;
+    width:100%;
+    max-width:440px;
+    background:var(--white);
+    border-radius:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.4);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .map-lightbox-inner iframe{
+    display:block;
+    width:100%;
+    height:52vh;
+    border:none;
+  }
+  .map-lightbox-action{
+    padding:12px;
+    flex:0 0 auto;
+  }
+  .map-lightbox-action a{
+    display:block;
+    text-align:center;
+    background:var(--pill);
+    color:var(--navy);
+    font-weight:700;
+    font-size:0.9rem;
+    text-decoration:none;
+    padding:12px;
+    border-radius:14px;
+    box-shadow:0 3px 0 var(--pill-shadow);
+  }
+  .map-lightbox-action a:active{
+    transform:translateY(2px);
+    box-shadow:0 1px 0 var(--pill-shadow);
+  }
+  .map-lightbox-inner .lightbox-close{
+    top:10px;
+    right:10px;
+    z-index:2;
+  }
 </style>
 </head>
 <body>
@@ -302,7 +393,7 @@
 
   <div class="links">
 
-    <a class="link-btn highlight" id="todaysMenuBtn" data-umami-event="click_todays_menu" href="menu.html" target="_blank" rel="noopener">
+    <a class="link-btn highlight" id="todaysMenuBtn" data-umami-event="click_todays_menu" data-sheet-src="menu.html" data-sheet-title="Today's Menu" href="menu.html" target="_blank" rel="noopener">
       <span class="badge-tag">Limited</span>
       <span class="icon-badge"><span class="emoji">📋</span></span>
       <span class="link-text">
@@ -311,15 +402,15 @@
       </span>
     </a>
 
-    <a class="link-btn" data-umami-event="click_whatsapp_order" href="https://www.whatsapp.com/catalog/6287856857217/" target="_blank" rel="noopener">
+    <a class="link-btn" id="waOrderBtn" data-umami-event="click_whatsapp_order" data-sheet-src="order.html" data-sheet-title="WhatsApp Order" href="order.html" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">💬</span></span>
       <span class="link-text">
         <span class="title">Whatsapp Order</span>
-        <span class="desc">Please confirm your order and stock availability before making payment. Thank you!</span>
+        <span class="desc">Pilih menu, atur jumlah, kirim pesanan langsung ke WhatsApp kami</span>
       </span>
     </a>
 
-    <a class="link-btn" data-umami-event="click_reheat_instruction" href="https://www.instagram.com/p/DMe2Zx1vgxr/?igsh=NW5hZjB6c2VpdXk5" target="_blank" rel="noopener">
+    <a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="assets/reheat-instruction.png" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">😊</span></span>
       <span class="link-text">
         <span class="title">Reheat Instruction</span>
@@ -327,7 +418,7 @@
       </span>
     </a>
 
-    <a class="link-btn" data-umami-event="click_kitchen_lab" href="https://heran-dika.github.io/Shakies-Recipe/landing.html" target="_blank" rel="noopener">
+    <a class="link-btn" id="kitchenLabBtn" data-umami-event="click_kitchen_lab" data-sheet-src="https://heran-dika.github.io/Shakies-Recipe/landing.html" data-sheet-title="Kitchen Lab" href="https://heran-dika.github.io/Shakies-Recipe/landing.html" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">🍵</span></span>
       <span class="link-text">
         <span class="title">Kitchen Lab</span>
@@ -335,7 +426,7 @@
       </span>
     </a>
 
-    <a class="link-btn" data-umami-event="click_pickup_location" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">
+    <a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">📍</span></span>
       <span class="link-text">
         <span class="title">Pick up Location</span>
@@ -376,11 +467,28 @@
     <div class="sheet-handle" id="sheetDragZone"></div>
     <div class="sheet-header" id="sheetHeaderDragZone">
       <div class="sheet-header-text">
-        <span class="sheet-title">Today's Menu</span>
+        <span class="sheet-title" id="sheetTitleText">Today's Menu</span>
       </div>
       <button class="sheet-close" id="menuSheetClose" aria-label="Tutup">✕</button>
     </div>
     <iframe id="menuSheetFrame" title="Today's Menu"></iframe>
+  </div>
+
+  <div class="lightbox-overlay" id="reheatOverlay">
+    <div class="lightbox-inner">
+      <button class="lightbox-close" id="reheatClose" aria-label="Tutup">✕</button>
+      <img src="assets/reheat-instruction.png" alt="Reheat Instruction">
+    </div>
+  </div>
+
+  <div class="lightbox-overlay" id="pickupOverlay">
+    <div class="map-lightbox-inner">
+      <button class="lightbox-close" id="pickupClose" aria-label="Tutup">✕</button>
+      <iframe src="https://www.google.com/maps?q=-6.2708882,106.9705108&z=17&output=embed" title="Lokasi Shakies" loading="lazy" allowfullscreen></iframe>
+      <div class="map-lightbox-action">
+        <a href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">Buka di Maps</a>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -405,18 +513,19 @@
     btn.textContent = isNight ? '☀️' : '🌙';
   });
 
-  // ===== Today's Menu sheet (kertas nongol dari bawah, iframe menu.html lokal - sama scope, no PWA capturing) =====
+  // ===== Sheet generik (kertas nongol dari bawah, load iframe lokal - sama scope, no PWA capturing) =====
+  // Dipakai bareng oleh Today's Menu (menu.html) & WhatsApp Order (order.html)
   (function(){
-    const MENU_URL = "menu.html";
-    const menuBtn = document.getElementById('todaysMenuBtn');
     const overlay = document.getElementById('menuSheetOverlay');
     const sheet = document.getElementById('menuSheet');
     const closeBtn = document.getElementById('menuSheetClose');
     const frame = document.getElementById('menuSheetFrame');
-    let loaded = false;
+    const titleEl = document.getElementById('sheetTitleText');
+    let currentSrc = null;
 
-    function openSheet(){
-      if(!loaded){ frame.src = MENU_URL; loaded = true; }
+    function openSheet(src, title){
+      if(currentSrc !== src){ frame.src = src; currentSrc = src; }
+      if(title) titleEl.textContent = title;
       overlay.classList.add('open');
       sheet.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -427,11 +536,13 @@
       document.body.style.overflow = '';
     }
 
-    menuBtn.addEventListener('click', (e) => {
-      // biarin ctrl/cmd/shift/middle-click tetap buka tab baru manual
-      if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-      e.preventDefault();
-      openSheet();
+    document.querySelectorAll('[data-sheet-src]').forEach((trigger) => {
+      trigger.addEventListener('click', (e) => {
+        // biarin ctrl/cmd/shift/middle-click tetap buka tab baru manual
+        if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        e.preventDefault();
+        openSheet(trigger.dataset.sheetSrc, trigger.dataset.sheetTitle);
+      });
     });
     overlay.addEventListener('click', closeSheet);
     closeBtn.addEventListener('click', closeSheet);
@@ -476,14 +587,80 @@
       zone.addEventListener('touchcancel', dragEnd);
     });
 
-    // ---- Kalau nyasar ke menu.html langsung (bukan lewat halaman ini), menu.html
-    // bakal redirect balik kesini bawa ?open=menu — begitu nyampe, buka kertasnya
-    // otomatis biar animasi slide-up-nya tetep keliatan, bukan nongol gitu aja ----
+    // ---- Kalau nyasar ke menu.html/order.html langsung (bukan lewat halaman ini),
+    // file itu bakal redirect balik kesini bawa ?open=menu / ?open=order — begitu
+    // nyampe, buka kertasnya otomatis biar animasi slide-up-nya tetep keliatan ----
     const params = new URLSearchParams(location.search);
-    if(params.get('open') === 'menu'){
+    const openParam = params.get('open');
+    const SHEET_MAP = {
+      menu: { src: 'menu.html', title: "Today's Menu" },
+      order: { src: 'order.html', title: 'WhatsApp Order' }
+    };
+    if(SHEET_MAP[openParam]){
       history.replaceState(null, '', location.pathname);
-      window.addEventListener('load', () => setTimeout(openSheet, 350));
+      const target = SHEET_MAP[openParam];
+      window.addEventListener('load', () => setTimeout(() => openSheet(target.src, target.title), 350));
     }
+  })();
+
+  // ===== Reheat Instruction lightbox (popup gambar, bukan buka tab IG) =====
+  (function(){
+    const reheatBtn = document.getElementById('reheatBtn');
+    const reheatOverlay = document.getElementById('reheatOverlay');
+    const reheatClose = document.getElementById('reheatClose');
+
+    function openReheat(){
+      reheatOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeReheat(){
+      reheatOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    reheatBtn.addEventListener('click', (e) => {
+      // ctrl/cmd/shift/middle-click tetap buka gambar di tab baru manual
+      if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+      e.preventDefault();
+      openReheat();
+    });
+    reheatOverlay.addEventListener('click', (e) => {
+      if(e.target === reheatOverlay) closeReheat(); // klik bg gelap = nutup
+    });
+    reheatClose.addEventListener('click', closeReheat);
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') closeReheat();
+    });
+  })();
+
+  // ===== Pick up Location lightbox (peta interaktif, bisa digeser/zoom) =====
+  (function(){
+    const pickupBtn = document.getElementById('pickupBtn');
+    const pickupOverlay = document.getElementById('pickupOverlay');
+    const pickupClose = document.getElementById('pickupClose');
+
+    function openPickup(){
+      pickupOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePickup(){
+      pickupOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    pickupBtn.addEventListener('click', (e) => {
+      // ctrl/cmd/shift/middle-click tetap buka Google Maps di tab baru manual
+      if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+      e.preventDefault();
+      openPickup();
+    });
+    pickupOverlay.addEventListener('click', (e) => {
+      if(e.target === pickupOverlay) closePickup(); // klik bg gelap = nutup
+    });
+    pickupClose.addEventListener('click', closePickup);
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape') closePickup();
+    });
   })();
 </script>
 

@@ -338,16 +338,19 @@
   .map-lightbox-action{
     padding:12px;
     flex:0 0 auto;
+    display:flex;
+    gap:8px;
   }
   .map-lightbox-action a{
     display:block;
+    flex:1;
     text-align:center;
     background:var(--pill);
     color:var(--navy);
     font-weight:700;
     font-size:0.9rem;
     text-decoration:none;
-    padding:12px;
+    padding:12px 8px;
     border-radius:14px;
     box-shadow:0 3px 0 var(--pill-shadow);
   }
@@ -478,7 +481,8 @@
       <button class="lightbox-close" id="pickupClose" aria-label="Tutup">✕</button>
       <iframe src="https://www.google.com/maps?q=-6.2708882,106.9705108&z=17&output=embed" title="Lokasi Shakies" loading="lazy" allowfullscreen></iframe>
       <div class="map-lightbox-action">
-        <a href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">Buka di Maps</a>
+        <a data-umami-event="click_pickup_maps" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">Buka di Maps</a>
+        <a data-umami-event="click_pickup_gosend" href="https://gojek.link/gosend/get_address?shared_location_id=Koytt6cVpswWvlA62gtBIz2Otn8K7MPkGSGNbXUd-qGx0gCB1nfwug848g9STYrm" target="_blank" rel="noopener">Buka di GoSend</a>
       </div>
     </div>
   </div>

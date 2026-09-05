@@ -42,10 +42,43 @@
     text-transform:uppercase; letter-spacing:.05em; font-size:14px;
     margin:0 0 7px; padding-bottom:4px; border-bottom:1px dashed var(--border);
   }
-  #kertasContent .item-line{ display:flex; align-items:baseline; gap:8px; padding:4px 0; font-size:15px; }
+  #kertasContent .item-line{ display:flex; align-items:center; gap:8px; padding:6px 0; font-size:15px; }
   #kertasContent .item-line .nama{ font-weight:600; color:var(--ink); }
-  #kertasContent .item-line .dots{ flex:1; border-bottom:1.5px dotted #C9C2B6; transform:translateY(-3px); min-width:16px; }
+  #kertasContent .item-line .dots{ flex:1; border-bottom:1.5px dotted #C9C2B6; transform:translateY(-3px); min-width:8px; }
   #kertasContent .item-line .harga{ font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--jade-dark); font-size:13.5px; white-space:nowrap; }
+
+  .qty-stepper{ display:flex; align-items:center; gap:6px; flex:0 0 auto; }
+  .qty-stepper button{
+    width:26px; height:26px; border-radius:50%; border:1.5px solid var(--jade);
+    background:var(--surface); color:var(--jade); font-size:15px; font-weight:700;
+    line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    padding:0;
+  }
+  .qty-stepper button:active{ background:var(--jade-tint); }
+  .qty-stepper button:disabled{ opacity:.35; cursor:default; }
+  .qty-stepper .qty-val{
+    min-width:18px; text-align:center; font-family:'IBM Plex Mono',monospace;
+    font-weight:600; font-size:14px; color:var(--ink);
+  }
+
+  .k-body{ padding-bottom:96px; } /* ruang buat sticky bar di bawah */
+  .order-bar{
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--surface); border-top:1px solid var(--border);
+    padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 10px);
+    display:flex; align-items:center; gap:10px;
+    box-shadow:0 -4px 12px rgba(31,65,114,.08);
+  }
+  .order-bar .order-total{ flex:1; min-width:0; }
+  .order-bar .order-total .count{ font-size:12px; color:var(--ink-soft); }
+  .order-bar .order-total .amount{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:15px; color:var(--jade-dark); }
+  .order-bar button{
+    background:var(--jade); color:#fff; border:none; border-radius:14px;
+    padding:12px 18px; font-weight:700; font-size:14px; font-family:'DM Sans',sans-serif;
+    cursor:pointer; white-space:nowrap;
+  }
+  .order-bar button:disabled{ background:#B9C4BF; cursor:default; }
+  .order-bar button:not(:disabled):active{ background:var(--jade-dark); }
 
   .k-foot{ text-align:center; flex-shrink:0; color:var(--ink-soft); padding:8px 16px 4px; font-size:11px; }
   .updated-note{ text-align:center; flex-shrink:0; color:var(--ink-soft); padding:0 16px calc(env(safe-area-inset-bottom,0px) + 20px); font-family:'IBM Plex Mono',monospace; font-size:10.5px; opacity:.8; }
@@ -66,10 +99,21 @@
   </div>
   <div id="footArea"></div>
 
+  <div class="order-bar" id="orderBar" hidden>
+    <div class="order-total">
+      <div class="count" id="orderCount">0 item</div>
+      <div class="amount" id="orderAmount">Rp 0</div>
+    </div>
+    <button id="orderSendBtn" disabled>Kirim Pesanan</button>
+  </div>
+
 <script>
 // Endpoint publik ini SENGAJA cuma manggil get_published_menu — nggak pernah manggil
 // get_menu/get_orders, jadi data order & customer nggak pernah nyampe ke halaman ini.
     const API_URL = 'https://script.google.com/macros/s/AKfycbwfOYUtAPhnE_KP3ya07IPx3RNqNZwNQlxYEdd65y0dJFae1A9eVfG9gR-MzD02txZDeg/exec';
+
+// Nomor WA yang sama dipakai di tombol WhatsApp lain di index.html
+const WA_NUMBER = '6287856857217';
 
 function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str==null?'':String(str); return d.innerHTML; }
 function rupiah(n){ return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
@@ -77,6 +121,49 @@ function formatWaktu(iso){
   if(!iso) return '';
   const d = new Date(iso);
   return d.toLocaleString('id-ID', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' }) + ' WIB';
+}
+
+// cart: { itemKey: { nama, harga, qty } }
+const cart = {};
+
+function updateBar(){
+  const orderBar = document.getElementById('orderBar');
+  const countEl = document.getElementById('orderCount');
+  const amountEl = document.getElementById('orderAmount');
+  const sendBtn = document.getElementById('orderSendBtn');
+
+  let totalQty = 0, totalHarga = 0;
+  Object.values(cart).forEach(it => {
+    if(it.qty > 0){ totalQty += it.qty; totalHarga += it.qty * it.harga; }
+  });
+
+  countEl.textContent = totalQty + ' item';
+  amountEl.textContent = rupiah(totalHarga);
+  sendBtn.disabled = totalQty === 0;
+  orderBar.hidden = false;
+}
+
+function setQty(key, qty){
+  if(!cart[key]) return;
+  cart[key].qty = Math.max(0, qty);
+  const valEl = document.querySelector(`.qty-stepper[data-key="${CSS.escape(key)}"] .qty-val`);
+  const minusBtn = document.querySelector(`.qty-stepper[data-key="${CSS.escape(key)}"] .qty-minus`);
+  if(valEl) valEl.textContent = cart[key].qty;
+  if(minusBtn) minusBtn.disabled = cart[key].qty === 0;
+  updateBar();
+}
+
+function sendOrder(){
+  const lines = Object.values(cart).filter(it => it.qty > 0).map(it => `${it.qty} x ${it.nama}`);
+  if(lines.length === 0) return;
+  const message = [
+    'Halo Shakies, mau pesan ya:',
+    ...lines,
+    '',
+    'Ready kan ka?',
+    'Mau diambil hari ini jam ....'
+  ].join('\n');
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 }
 
 async function load(){
@@ -93,20 +180,39 @@ async function load(){
       return;
     }
 
-    bodyEl.innerHTML = `<div id="kertasContent">${data.categories.map(cat => `
+    bodyEl.innerHTML = `<div id="kertasContent">${data.categories.map((cat, ci) => `
       <div class="kat-block">
         <div class="kat-title">${escapeHtml(cat.kategori)}</div>
-        ${cat.items.map(it => `
+        ${cat.items.map((it, ii) => {
+          const key = `${ci}-${ii}`;
+          cart[key] = { nama: it.nama, harga: it.harga, qty: 0 };
+          return `
           <div class="item-line">
             <span class="nama">${escapeHtml(it.nama)}</span>
             <span class="dots"></span>
             <span class="harga">${rupiah(it.harga)}</span>
-          </div>`).join('')}
+            <span class="qty-stepper" data-key="${key}">
+              <button type="button" class="qty-minus" aria-label="Kurangi" disabled>−</button>
+              <span class="qty-val">0</span>
+              <button type="button" class="qty-plus" aria-label="Tambah">+</button>
+            </span>
+          </div>`;
+        }).join('')}
       </div>`).join('')}</div>`;
 
     footEl.innerHTML = `
-      <div class="k-foot">Order via chat / DM — kuota terbatas per hari</div>
       <div class="updated-note">Terakhir diupdate: ${formatWaktu(data.publishedAt)}</div>`;
+
+    bodyEl.addEventListener('click', (e) => {
+      const stepper = e.target.closest('.qty-stepper');
+      if(!stepper) return;
+      const key = stepper.dataset.key;
+      if(e.target.classList.contains('qty-plus')) setQty(key, cart[key].qty + 1);
+      if(e.target.classList.contains('qty-minus')) setQty(key, cart[key].qty - 1);
+    });
+
+    document.getElementById('orderSendBtn').addEventListener('click', sendOrder);
+    updateBar();
   } catch(e){
     bodyEl.innerHTML = `<div class="empty-state"><div class="glyph">⚠️</div>Gagal memuat menu.<br>Coba refresh halaman ini lagi.</div>`;
   }

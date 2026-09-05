@@ -402,14 +402,6 @@
       </span>
     </a>
 
-    <a class="link-btn" id="waOrderBtn" data-umami-event="click_whatsapp_order" data-sheet-src="order.html" data-sheet-title="WhatsApp Order" href="order.html" target="_blank" rel="noopener">
-      <span class="icon-badge"><span class="emoji">💬</span></span>
-      <span class="link-text">
-        <span class="title">Whatsapp Order</span>
-        <span class="desc">Pilih menu, atur jumlah, kirim pesanan langsung ke WhatsApp kami</span>
-      </span>
-    </a>
-
     <a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="assets/reheat-instruction.png" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">😊</span></span>
       <span class="link-text">
@@ -514,7 +506,7 @@
   });
 
   // ===== Sheet generik (kertas nongol dari bawah, load iframe lokal - sama scope, no PWA capturing) =====
-  // Dipakai bareng oleh Today's Menu (menu.html) & WhatsApp Order (order.html)
+  // Dipakai Today's Menu (menu.html) & Kitchen Lab (embed eksternal)
   (function(){
     const overlay = document.getElementById('menuSheetOverlay');
     const sheet = document.getElementById('menuSheet');
@@ -587,14 +579,13 @@
       zone.addEventListener('touchcancel', dragEnd);
     });
 
-    // ---- Kalau nyasar ke menu.html/order.html langsung (bukan lewat halaman ini),
-    // file itu bakal redirect balik kesini bawa ?open=menu / ?open=order — begitu
-    // nyampe, buka kertasnya otomatis biar animasi slide-up-nya tetep keliatan ----
+    // ---- Kalau nyasar ke menu.html langsung (bukan lewat halaman ini), file itu
+    // bakal redirect balik kesini bawa ?open=menu — begitu nyampe, buka kertasnya
+    // otomatis biar animasi slide-up-nya tetep keliatan ----
     const params = new URLSearchParams(location.search);
     const openParam = params.get('open');
     const SHEET_MAP = {
-      menu: { src: 'menu.html', title: "Today's Menu" },
-      order: { src: 'order.html', title: 'WhatsApp Order' }
+      menu: { src: 'menu.html', title: "Today's Menu" }
     };
     if(SHEET_MAP[openParam]){
       history.replaceState(null, '', location.pathname);

@@ -509,6 +509,20 @@
     btn.textContent = isNight ? '☀️' : '🌙';
   });
 
+  // ===== Param ?open=... (dibaca sekali di sini, dipakai bareng sheet & lightbox di bawah) =====
+  // Cuma key 'open' yang dibuang dari URL — parameter lain (mis. UTM) tetap dipertahankan,
+  // biar nggak kepotong sebelum sempat kebaca script Umami (defer, jalan setelah blok ini).
+  const pendingOpen = (function(){
+    const urlParams = new URLSearchParams(location.search);
+    const val = urlParams.get('open');
+    if(val){
+      urlParams.delete('open');
+      const rest = urlParams.toString();
+      history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
+    }
+    return val;
+  })();
+
   // ===== Sheet generik (kertas nongol dari bawah, load iframe lokal - sama scope, no PWA capturing) =====
   // Dipakai Today's Menu (menu.html) & Kitchen Lab (embed eksternal)
   (function(){
@@ -586,14 +600,11 @@
     // ---- Kalau nyasar ke menu.html langsung (bukan lewat halaman ini), file itu
     // bakal redirect balik kesini bawa ?open=menu — begitu nyampe, buka kertasnya
     // otomatis biar animasi slide-up-nya tetep keliatan ----
-    const params = new URLSearchParams(location.search);
-    const openParam = params.get('open');
     const SHEET_MAP = {
       menu: { src: 'menu.html', title: "Today's Menu" }
     };
-    if(SHEET_MAP[openParam]){
-      history.replaceState(null, '', location.pathname);
-      const target = SHEET_MAP[openParam];
+    if(SHEET_MAP[pendingOpen]){
+      const target = SHEET_MAP[pendingOpen];
       window.addEventListener('load', () => setTimeout(() => openSheet(target.src, target.title), 350));
     }
   })();
@@ -626,6 +637,11 @@
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape') closeReheat();
     });
+
+    // Link/QR langsung: index.html?open=reheat
+    if(pendingOpen === 'reheat'){
+      window.addEventListener('load', () => setTimeout(openReheat, 350));
+    }
   })();
 
   // ===== Pick up Location lightbox (peta interaktif, bisa digeser/zoom) =====
@@ -656,6 +672,11 @@
     document.addEventListener('keydown', (e) => {
       if(e.key === 'Escape') closePickup();
     });
+
+    // Link/QR langsung: index.html?open=pickup
+    if(pendingOpen === 'pickup'){
+      window.addEventListener('load', () => setTimeout(openPickup, 350));
+    }
   })();
 </script>
 

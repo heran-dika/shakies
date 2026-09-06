@@ -1,0 +1,80 @@
+{
+  "categories": [
+    {
+      "kategori": "Asian Bread",
+      "items": [
+        {
+          "nama": "Shokupan OG",
+          "harga": 45000
+        },
+        {
+          "nama": "Shokupan Beef And cheese",
+          "harga": 70000
+        }
+      ]
+    },
+    {
+      "kategori": "Dessert & Cake",
+      "items": [
+        {
+          "nama": "Banana bread",
+          "harga": 12000
+        }
+      ]
+    },
+    {
+      "kategori": "Donut",
+      "items": [
+        {
+          "nama": "Pumpkin Donut Original",
+          "harga": 10000
+        },
+        {
+          "nama": "Donut Meses",
+          "harga": 15000
+        }
+      ]
+    },
+    {
+      "kategori": "Drinks",
+      "items": [
+        {
+          "nama": "Matcha Chino",
+          "harga": 15000
+        },
+        {
+          "nama": "Kopi Susu Kesayangan",
+          "harga": 15000
+        }
+      ]
+    },
+    {
+      "kategori": "Salt Bread",
+      "items": [
+        {
+          "nama": "Salt Bread Original",
+          "harga": 16000
+        },
+        {
+          "nama": "Salt Bread Egg mayo",
+          "harga": 28000
+        }
+      ]
+    },
+    {
+      "kategori": "Sourdough",
+      "items": [
+        {
+          "nama": "Cranberry cream cheese (large)",
+          "harga": 30000
+        },
+        {
+          "nama": "Cranberry cream cheese (small)",
+          "harga": 15000
+        }
+      ]
+    }
+  ],
+  "publishedAt": "2026-09-06T06:18:32.059Z",
+  "publishedBy": "dika"
+}

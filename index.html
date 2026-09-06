@@ -341,7 +341,8 @@
     display:flex;
     gap:8px;
   }
-  .map-lightbox-action a{
+  .map-lightbox-action a,
+  .map-lightbox-action button{
     display:block;
     flex:1;
     text-align:center;
@@ -353,10 +354,22 @@
     padding:12px 8px;
     border-radius:14px;
     box-shadow:0 3px 0 var(--pill-shadow);
+    border:none;
+    font-family:inherit;
+    cursor:pointer;
   }
-  .map-lightbox-action a:active{
+  .map-lightbox-action a:active,
+  .map-lightbox-action button:active{
     transform:translateY(2px);
     box-shadow:0 1px 0 var(--pill-shadow);
+  }
+  .map-lightbox-note{
+    margin:0;
+    padding:0 14px 14px;
+    font-size:11.5px;
+    line-height:1.45;
+    color:var(--navy-soft);
+    text-align:center;
   }
   .map-lightbox-inner .lightbox-close{
     top:10px;
@@ -482,8 +495,9 @@
       <iframe src="https://www.google.com/maps?q=-6.2708882,106.9705108&z=17&output=embed" title="Lokasi Shakies" loading="lazy" allowfullscreen></iframe>
       <div class="map-lightbox-action">
         <a data-umami-event="click_pickup_maps" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">Buka di Maps</a>
-        <a data-umami-event="click_pickup_gosend" href="https://gojek.link/gosend/get_address?shared_location_id=Koytt6cVpswWvlA62gtBIz2Otn8K7MPkGSGNbXUd-qGx0gCB1nfwug848g9STYrm" target="_blank" rel="noopener">Buka di GoSend</a>
+        <button type="button" id="copyAddressBtn" data-umami-event="click_pickup_copy_address">Salin Alamat</button>
       </div>
+      <p class="map-lightbox-note">Untuk Shopee kirim & GoSend, titik lokasi biasanya udah pas dan bisa langsung dipilih. Kalau pakai Grab, titiknya kadang masih agak meleset — pastiin alamat detail di atas ditulis manual biar drivernya nggak nyasar.</p>
     </div>
   </div>
 
@@ -649,6 +663,37 @@
     const pickupBtn = document.getElementById('pickupBtn');
     const pickupOverlay = document.getElementById('pickupOverlay');
     const pickupClose = document.getElementById('pickupClose');
+    const copyAddressBtn = document.getElementById('copyAddressBtn');
+    const PICKUP_ADDRESS = 'SHAKIES - Jl. Lotus Raya Blok D2 no.11A';
+
+    async function copyAddress(){
+      try{
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(PICKUP_ADDRESS);
+        } else {
+          // Fallback buat browser/webview lama yang gak support Clipboard API
+          const ta = document.createElement('textarea');
+          ta.value = PICKUP_ADDRESS;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const original = copyAddressBtn.textContent;
+        copyAddressBtn.textContent = 'Tersalin! ✓';
+        copyAddressBtn.disabled = true;
+        setTimeout(() => {
+          copyAddressBtn.textContent = original;
+          copyAddressBtn.disabled = false;
+        }, 1500);
+      } catch(e){
+        alert('Alamat: ' + PICKUP_ADDRESS);
+      }
+    }
+    copyAddressBtn.addEventListener('click', copyAddress);
 
     function openPickup(){
       pickupOverlay.classList.add('open');

@@ -61,7 +61,7 @@
     font-weight:600; font-size:14px; color:var(--ink);
   }
 
-  .k-body{ padding-bottom:96px; } /* ruang buat sticky bar di bawah */
+  .k-body{ padding-bottom:12px; }
   .order-bar{
     position:fixed; bottom:0; left:0; right:0;
     background:var(--surface); border-top:1px solid var(--border);
@@ -216,7 +216,7 @@ function renderMenu(data){
     </div>`).join('')}</div>`;
 
   footEl.innerHTML = `
-    <div class="updated-note">Terakhir diupdate: ${formatWaktu(data.publishedAt)}</div>`;
+    <div class="updated-note">Terakhir menu diupdate: ${formatWaktu(data.publishedAt)}</div>`;
 
   if(!boundEvents){
     bodyEl.addEventListener('click', (e) => {

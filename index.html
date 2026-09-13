@@ -73,6 +73,15 @@
     padding:0;
   }
   .daynight-toggle:active{ transform:scale(0.94); }
+  @media (hover:hover){
+    .daynight-toggle:hover{ animation: btnShake .4s ease; }
+  }
+  @keyframes btnShake{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-3px); }
+    50%{ transform:translateX(3px); }
+    75%{ transform:translateX(-2px); }
+  }
 
   /* Card welcome dihapus — teks langsung di tengah hero, warna ikut siang/malam */
   .welcome-overlay{
@@ -122,6 +131,9 @@
   }
   .social-row a svg{ width:18px; height:18px; }
   .social-row a:active{ transform:scale(0.92); }
+  @media (hover:hover){
+    .social-row a:hover{ animation: btnShake .4s ease; }
+  }
 
   /* ===== LINKS ===== */
   .links{
@@ -159,6 +171,21 @@
   @keyframes breatheOut{
     0%{ box-shadow:0 3px 0 var(--pill-shadow), 0 0 0 0 rgba(31,56,100,0.4); }
     100%{ box-shadow:0 3px 0 var(--pill-shadow), 0 0 16px 8px rgba(31,56,100,0); }
+  }
+  @media (hover:hover){
+    .link-btn:hover{
+      animation: btnWobble .5s ease;
+    }
+    .link-btn.highlight:hover{
+      animation: breatheOut 1.8s ease-out infinite, btnWobble .5s ease;
+    }
+  }
+  @keyframes btnWobble{
+    0%,100%{ transform:rotate(0deg); }
+    20%{ transform:rotate(-1deg); }
+    40%{ transform:rotate(1deg); }
+    60%{ transform:rotate(-0.6deg); }
+    80%{ transform:rotate(0.4deg); }
   }
   .badge-tag{
     position:absolute;

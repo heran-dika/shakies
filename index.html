@@ -403,6 +403,18 @@
     right:10px;
     z-index:2;
   }
+  .sprinkle-dot{
+    position:fixed;
+    width:12px; height:12px;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:999;
+    animation: sprinkleFly .55s ease-out forwards;
+  }
+  @keyframes sprinkleFly{
+    0%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+    100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); opacity:0; }
+  }
 </style>
 </head>
 <body>
@@ -495,7 +507,7 @@
 
   </div>
 
-  <footer>© Shakies — Food · Cookies · Drinks</footer>
+  <footer>© SHAKIES 2023 — Bakery · Cookies · Drinks</footer>
 
   <div class="sheet-overlay" id="menuSheetOverlay"></div>
   <div class="menu-sheet" id="menuSheet" role="dialog" aria-modal="true" aria-label="Today's Menu">
@@ -749,6 +761,43 @@
     if(pendingOpen === 'pickup'){
       window.addEventListener('load', () => setTimeout(openPickup, 350));
     }
+  })();
+
+  // ===== Sprinkle effect pas layar disentuh/di-scroll — global, bukan cuma di tombol =====
+  // Di-throttle biar nggak nge-spam elemen DOM pas jari geser cepat (touchmove nembak
+  // puluhan kali per detik kalau nggak dibatasi).
+  (function(){
+    const colors = ['var(--navy)', 'var(--pill-shadow)', '#ffffff'];
+    const THROTTLE_MS = 25;
+    let lastSpawn = 0;
+
+    function spawnSprinkle(x, y){
+      for(let i = 0; i < 2; i++){
+        const dot = document.createElement('span');
+        dot.className = 'sprinkle-dot';
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 80 + Math.random() * 72;
+        dot.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        dot.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+        dot.style.left = x + 'px';
+        dot.style.top = y + 'px';
+        dot.style.background = colors[i % colors.length];
+        document.body.appendChild(dot);
+        dot.addEventListener('animationend', () => dot.remove());
+      }
+    }
+
+    function handleTouch(e){
+      const now = Date.now();
+      if(now - lastSpawn < THROTTLE_MS) return;
+      const t = e.touches[0];
+      if(!t) return;
+      lastSpawn = now;
+      spawnSprinkle(t.clientX, t.clientY);
+    }
+
+    document.addEventListener('touchstart', handleTouch, { passive: true });
+    document.addEventListener('touchmove', handleTouch, { passive: true });
   })();
 </script>
 

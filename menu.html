@@ -46,10 +46,15 @@
     text-transform:uppercase; letter-spacing:.05em; font-size:14px;
     margin:0 0 7px; padding-bottom:4px; border-bottom:1px dashed var(--border);
   }
-  #kertasContent .item-line{ display:flex; align-items:center; gap:8px; padding:6px 0; font-size:15px; }
+  #kertasContent .item-line{ display:flex; align-items:center; gap:8px; padding:6px 0; font-size:15px; border-radius:8px; transition:background-color .1s ease; }
   #kertasContent .item-line .nama{ font-weight:600; color:var(--ink); }
   #kertasContent .item-line .dots{ flex:1; border-bottom:1.5px dotted #C9C2B6; transform:translateY(-3px); min-width:8px; }
   #kertasContent .item-line .harga{ font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--jade-dark); font-size:13.5px; white-space:nowrap; }
+  #kertasContent .item-line.flash{ animation:itemFlash .6s ease-out; }
+  @keyframes itemFlash{
+    0%{ background-color:var(--jade-tint); }
+    100%{ background-color:transparent; }
+  }
 
   .qty-stepper{ display:flex; align-items:center; gap:6px; flex:0 0 auto; }
   .qty-stepper button{
@@ -57,6 +62,7 @@
     background:var(--surface); color:var(--jade); font-size:15px; font-weight:700;
     line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
     padding:0;
+    -webkit-tap-highlight-color:transparent;
   }
   .qty-stepper button:active{ background:var(--jade-tint); }
   .qty-stepper button:disabled{ opacity:.35; cursor:default; }
@@ -86,7 +92,8 @@
 
   .confetti-piece{
     position:fixed;
-    width:7px; height:7px;
+    width:24px; height:24px;
+    border-radius:0;
     pointer-events:none;
     z-index:999;
     animation: confettiBurst .6s ease-out forwards;
@@ -174,6 +181,31 @@ function formatWaktu(iso){
 const cart = {};
 let boundEvents = false; // listener klik/tap dipasang sekali doang, gak per render ulang
 
+// State nilai yang lagi ditampilin di order-bar, buat titik awal animasi count-up
+let displayedQty = 0, displayedHarga = 0;
+const qtyAnimRef = { frame: null };
+const amountAnimRef = { frame: null };
+
+// Animasi angka dari `from` ke `to` (kayak odometer), pake requestAnimationFrame.
+// cancelRef dipakai biar animasi sebelumnya di-cancel kalau ada update baru sebelum kelar
+// (misal user klik + berkali-kali cepat) — nggak numpuk beberapa animasi bareng.
+function animateNumber(el, from, to, duration, formatFn, cancelRef){
+  if(cancelRef.frame) cancelAnimationFrame(cancelRef.frame);
+  const start = performance.now();
+  function step(now){
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    const value = from + (to - from) * eased;
+    el.textContent = formatFn(value);
+    if(t < 1){
+      cancelRef.frame = requestAnimationFrame(step);
+    } else {
+      cancelRef.frame = null;
+    }
+  }
+  cancelRef.frame = requestAnimationFrame(step);
+}
+
 function updateBar(){
   const orderBar = document.getElementById('orderBar');
   const countEl = document.getElementById('orderCount');
@@ -185,8 +217,11 @@ function updateBar(){
     if(it.qty > 0){ totalQty += it.qty; totalHarga += it.qty * it.harga; }
   });
 
-  countEl.textContent = totalQty + ' item';
-  amountEl.textContent = rupiah(totalHarga);
+  animateNumber(countEl, displayedQty, totalQty, 300, (v) => Math.round(v) + ' item', qtyAnimRef);
+  animateNumber(amountEl, displayedHarga, totalHarga, 350, rupiah, amountAnimRef);
+  displayedQty = totalQty;
+  displayedHarga = totalHarga;
+
   sendBtn.disabled = totalQty === 0;
   orderBar.hidden = false;
 }
@@ -214,7 +249,7 @@ function spawnConfetti(originEl){
     const p = document.createElement('span');
     p.className = 'confetti-piece';
     const angle = Math.random() * Math.PI * 2;
-    const dist = 40 + Math.random() * 60;
+    const dist = 160 + Math.random() * 240;
     p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
     p.style.setProperty('--dy', (Math.sin(angle) * dist - 30) + 'px'); // bias ke atas dikit
     p.style.setProperty('--rot', (Math.random() * 360) + 'deg');
@@ -286,7 +321,15 @@ function renderMenu(data){
       const stepper = e.target.closest('.qty-stepper');
       if(!stepper) return;
       const key = stepper.dataset.key;
-      if(e.target.classList.contains('qty-plus')) setQty(key, cart[key].qty + 1);
+      if(e.target.classList.contains('qty-plus')){
+        setQty(key, cart[key].qty + 1);
+        const row = stepper.closest('.item-line');
+        if(row){
+          row.classList.remove('flash');
+          void row.offsetWidth; // restart animasi kalau diklik cepat berkali-kali
+          row.classList.add('flash');
+        }
+      }
       if(e.target.classList.contains('qty-minus')) setQty(key, cart[key].qty - 1);
     });
     document.getElementById('orderSendBtn').addEventListener('click', sendOrder);

@@ -29,7 +29,11 @@
   }
 
   .k-head{ padding: calc(env(safe-area-inset-top,0px) + 24px) 20px 18px; text-align:center; flex-shrink:0; border-bottom:1px solid var(--border); position:relative; }
-  .k-head .km-logo{ width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto 10px; box-shadow:0 2px 8px rgba(0,0,0,.12); }
+  .k-head .km-logo{ width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto 10px; box-shadow:0 2px 8px rgba(0,0,0,.12); animation: logoPopIn .5s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes logoPopIn{
+    0%{ transform:scale(0.4); opacity:0; }
+    100%{ transform:scale(1); opacity:1; }
+  }
   .k-head .km-logo img{ width:100%; height:100%; object-fit:cover; }
   .k-head .km-brand{ font-family:'Fraunces',serif; font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-0.01em; }
   .k-head .sub{ font-size:17px; color:var(--subtitle); font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-top:4px; }
@@ -80,12 +84,36 @@
   .order-bar button:disabled{ background:#B9C4BF; cursor:default; }
   .order-bar button:not(:disabled):active{ background:var(--jade-dark); }
 
+  .confetti-piece{
+    position:fixed;
+    width:7px; height:7px;
+    pointer-events:none;
+    z-index:999;
+    animation: confettiBurst .6s ease-out forwards;
+  }
+  @keyframes confettiBurst{
+    0%{ transform:translate(-50%,-50%) rotate(0deg) scale(1); opacity:1; }
+    100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(0.4); opacity:0; }
+  }
+
   .k-foot{ text-align:center; flex-shrink:0; color:var(--ink-soft); padding:8px 16px 4px; font-size:11px; }
   .updated-note{ text-align:center; flex-shrink:0; color:var(--ink-soft); padding:0 16px calc(env(safe-area-inset-bottom,0px) + 96px); font-family:'IBM Plex Mono',monospace; font-size:10.5px; opacity:.8; }
 
   .empty-state{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px; color:var(--ink-soft); gap:8px; }
   .empty-state .glyph{ font-size:34px; }
-  .spinner{ flex:1; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); font-size:13px; }
+
+  .skeleton-line{
+    height:14px; border-radius:6px; margin-bottom:10px;
+    background:linear-gradient(90deg, #ECE6DA 25%, #F5F0E8 37%, #ECE6DA 63%);
+    background-size:400% 100%;
+    animation:skeletonShimmer 1.4s ease infinite;
+  }
+  .skeleton-line.title{ width:40%; height:12px; margin-bottom:14px; }
+  .skeleton-block{ margin-bottom:18px; }
+  @keyframes skeletonShimmer{
+    0%{ background-position:100% 50%; }
+    100%{ background-position:0 50%; }
+  }
 </style>
 </head>
 <body>
@@ -95,7 +123,17 @@
     <div class="sub">Menu Hari Ini</div>
   </div>
   <div class="k-body" id="kBody">
-    <div class="spinner">Memuat menu...</div>
+    <div class="skeleton-block">
+      <div class="skeleton-line title"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+    </div>
+    <div class="skeleton-block">
+      <div class="skeleton-line title"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line"></div>
+    </div>
   </div>
   <div id="footArea"></div>
 
@@ -167,6 +205,27 @@ function setQty(key, qty){
   updateBar();
 }
 
+function spawnConfetti(originEl){
+  const rect = originEl.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+  const colors = ['#2F5D50', '#C1443C', '#B9852D', '#1F4172'];
+  for(let i = 0; i < 14; i++){
+    const p = document.createElement('span');
+    p.className = 'confetti-piece';
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 40 + Math.random() * 60;
+    p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+    p.style.setProperty('--dy', (Math.sin(angle) * dist - 30) + 'px'); // bias ke atas dikit
+    p.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.background = colors[i % colors.length];
+    document.body.appendChild(p);
+    p.addEventListener('animationend', () => p.remove());
+  }
+}
+
 function sendOrder(){
   const lines = Object.values(cart).filter(it => it.qty > 0).map(it => `${it.qty} x ${it.nama}`);
   if(lines.length === 0) return;
@@ -177,7 +236,11 @@ function sendOrder(){
     'Ready kan ka?',
     'Mau diambil hari ini jam ....'
   ].join('\n');
-  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+  spawnConfetti(document.getElementById('orderSendBtn'));
+  // Jeda dikit biar confetti sempat kelihatan sebelum kepindah ke WA
+  setTimeout(() => {
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+  }, 450);
 }
 
 // Render isi menu dari objek data {categories, publishedAt}. Dipisah dari load()

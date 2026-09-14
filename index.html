@@ -426,6 +426,47 @@
     right:10px;
     z-index:2;
   }
+  /* ===== Hero hotspot easter egg (tap pintu/orang/logo -> toast lucu) ===== */
+  .hero-hotspot{
+    position:absolute;
+    z-index:3; /* di atas gambar hero, di bawah welcome-overlay (z-index:4) */
+    background:transparent;
+    border:none;
+    padding:0;
+    margin:0;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .egg-toast-stack{
+    position:fixed;
+    z-index:1000;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    transform:translate(-50%, -100%); /* nempel di anchor point, tumbuh ke atas seiring nambah anak */
+    pointer-events:none;
+  }
+  .egg-toast{
+    background:var(--navy);
+    color:var(--white);
+    font-size:0.8rem;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(31,56,100,0.3);
+    white-space:nowrap;
+    max-width:70vw;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    animation: eggToastPop 1.8s ease forwards;
+  }
+  @keyframes eggToastPop{
+    0%{ opacity:0; transform:scale(0.9) translateY(6px); }
+    12%{ opacity:1; transform:scale(1) translateY(0); }
+    80%{ opacity:1; }
+    100%{ opacity:0; }
+  }
   .sprinkle-dot{
     position:fixed;
     width:12px; height:12px;
@@ -467,6 +508,11 @@
         </a>
       </div>
     </div>
+
+    <button class="hero-hotspot" id="hotspotDoor" aria-label="" style="left:42%; top:68%; width:16%; height:22%;"></button>
+    <button class="hero-hotspot" id="hotspotSolo" aria-label="" style="left:26%; top:72%; width:16%; height:18%;"></button>
+    <button class="hero-hotspot" id="hotspotGroup" aria-label="" style="left:60%; top:70%; width:20%; height:18%;"></button>
+    <button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:40%; top:32%; width:20%; height:15%;"></button>
   </div>
 
   <div class="links">
@@ -849,6 +895,92 @@
 
     document.addEventListener('touchstart', handleTouch, { passive: true });
     document.addEventListener('touchmove', handleTouch, { passive: true });
+  })();
+
+  // ===== Easter egg: tap hotspot di hero (pintu/orang sendiri/orang kelompok/logo) -> toast lucu random =====
+  (function(){
+    const MESSAGES = {
+      hotspotDoor: [
+        'Tok... tok... tok...',
+        'Sabar, roti-nya baru keluar oven',
+        'Pelan-pelan say, kagee~t',
+        'Ngetok mulu, laper ya?',
+        'Oke oke, sebentar yaa'
+      ],
+      hotspotSolo: [
+        'Me time emang the best',
+        'Enaknya order apa ya?',
+        'Solo trip, ditemenin salt bread anget',
+        'Healing sambil ngunyah',
+        'Nggak sabar nyobain menu baru'
+      ],
+      hotspotGroup: [
+        'Gw order banyak dikasih diskon dong!',
+        'Tau gk sih, gw sering upload di sosmed klo ini enak banget',
+        'Ngobrol makin seru kalau ada donut di meja',
+        'Kumpul bareng, shokupan-nya dibagi rata ya',
+        'Traktir dong, kan abis gajian'
+      ],
+      hotspotLogo: [
+        'Halo, gw baby chef Shakies 👶🍳',
+        'Jangan colek-colek, lagi bikin roti nih',
+        'Geli woy 😆',
+        'Woy jangan modusin gw',
+        'Udah ah, gw balik masak lagi'
+      ]
+    };
+    const lastIndex = {}; // simpen index kalimat terakhir per hotspot, biar random-nya nggak ngulang 2x beruntun
+    const tapCount = {}; // hitung tap per hotspot, toast cuma muncul tiap kelipatan 3
+    const stackContainers = {}; // 1 container stack per hotspot, nempel di atas tombolnya
+
+    function pickMessage(spotId){
+      const list = MESSAGES[spotId];
+      let idx;
+      do { idx = Math.floor(Math.random() * list.length); }
+      while(list.length > 1 && idx === lastIndex[spotId]);
+      lastIndex[spotId] = idx;
+      return list[idx];
+    }
+
+    function getStack(spotId, el){
+      let stack = stackContainers[spotId];
+      if(!stack){
+        stack = document.createElement('div');
+        stack.className = 'egg-toast-stack';
+        document.body.appendChild(stack);
+        stackContainers[spotId] = stack;
+      }
+      // posisi anchor = tengah-atas tombol hotspot, di-refresh tiap trigger (jaga-jaga kalau layar di-resize/scroll)
+      const rect = el.getBoundingClientRect();
+      stack.style.left = (rect.left + rect.width / 2) + 'px';
+      stack.style.top = rect.top + 'px';
+      return stack;
+    }
+
+    function showToast(spotId, el, text){
+      const stack = getStack(spotId, el);
+      const toast = document.createElement('div');
+      toast.className = 'egg-toast';
+      toast.textContent = text;
+      stack.appendChild(toast); // ditambah di akhir -> nongol paling bawah (deket tombol), yang lama otomatis kedorong ke atas
+      toast.addEventListener('animationend', () => {
+        toast.remove();
+        if(stack.children.length === 0){
+          stack.remove();
+          delete stackContainers[spotId];
+        }
+      });
+    }
+
+    Object.keys(MESSAGES).forEach((spotId) => {
+      const el = document.getElementById(spotId);
+      if(!el) return;
+      el.addEventListener('click', () => {
+        tapCount[spotId] = (tapCount[spotId] || 0) + 1;
+        if(tapCount[spotId] % 3 !== 0) return; // baru muncul toast tiap tap ke-3, ke-6, dst
+        showToast(spotId, el, pickMessage(spotId));
+      });
+    });
   })();
 </script>
 

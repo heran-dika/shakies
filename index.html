@@ -169,7 +169,11 @@
     text-decoration:none;
     color:var(--navy);
     box-shadow:0 3px 0 var(--pill-shadow);
-    transition:transform .12s ease, box-shadow .12s ease;
+    transition:transform .12s ease, box-shadow .12s ease, opacity .75s ease;
+    opacity:0;
+  }
+  .link-btn.visible{
+    opacity:1;
   }
   .link-btn:active{
     transform:translateY(2px);
@@ -484,14 +488,6 @@
       </span>
     </a>
 
-    <a class="link-btn" id="kitchenLabBtn" data-umami-event="click_kitchen_lab" data-sheet-src="https://heran-dika.github.io/Shakies-Recipe/landing.html" data-sheet-title="Kitchen Lab" href="https://heran-dika.github.io/Shakies-Recipe/landing.html" target="_blank" rel="noopener">
-      <span class="icon-badge"><span class="emoji">🍵</span></span>
-      <span class="link-text">
-        <span class="title">Kitchen Lab</span>
-        <span class="desc">Sharing delicious recipe ala shakies</span>
-      </span>
-    </a>
-
     <a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">📍</span></span>
       <span class="link-text">
@@ -505,6 +501,14 @@
       <span class="link-text">
         <span class="title">Write Review on Google Maps</span>
         <span class="desc">You like our food, please tell everyone.</span>
+      </span>
+    </a>
+
+    <a class="link-btn" id="kitchenLabBtn" data-umami-event="click_kitchen_lab" data-sheet-src="https://heran-dika.github.io/Shakies-Recipe/landing.html" data-sheet-title="Kitchen Lab" href="https://heran-dika.github.io/Shakies-Recipe/landing.html" target="_blank" rel="noopener">
+      <span class="icon-badge"><span class="emoji">🍵</span></span>
+      <span class="link-text">
+        <span class="title">Kitchen Lab</span>
+        <span class="desc">Sharing delicious recipe ala shakies</span>
       </span>
     </a>
 
@@ -562,6 +566,29 @@
 </div>
 
 <script>
+  // ===== Reveal tombol .links satu-satu pas discroll masuk viewport (bukan pas page load) =====
+  (function(){
+    const items = Array.from(document.querySelectorAll('.links .link-btn'));
+    const STAGGER_MS = 90;
+
+    if(!('IntersectionObserver' in window)){
+      // fallback browser lama: langsung tampilin semua, gak usah dipaksa nunggu observer
+      items.forEach((el) => el.classList.add('visible'));
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if(!entry.isIntersecting) return;
+        const idx = items.indexOf(entry.target);
+        setTimeout(() => entry.target.classList.add('visible'), idx * STAGGER_MS);
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.15 });
+
+    items.forEach((el) => observer.observe(el));
+  })();
+
   const hero = document.getElementById('hero');
   const btn = document.getElementById('toggleBtn');
   const toggleIcon = document.getElementById('toggleIcon');

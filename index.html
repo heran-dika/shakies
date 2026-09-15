@@ -936,32 +936,52 @@
         'Sabar, roti-nya baru keluar oven',
         'Pelan-pelan say, kagee~t',
         'Ngetok mulu, laper ya?',
-        'Oke oke, sebentar yaa'
+        'Oke oke, sebentar yaa',
+        'Bentar dong, tangannya lagi belepotan tepung',
+        'Kalem, entar pintunya lepas',
+        'Ini pintu apa drum, ditokin mulu',
+        'Buat order bisa klik menu bawah ya',
+        'Udah gw denger dari tadi kok'
       ],
       hotspotSolo: [
         'Me time emang the best',
         'Enaknya order apa ya?',
         'Solo trip, ditemenin salt bread anget',
         'Healing sambil ngunyah',
-        'Nggak sabar nyobain menu baru'
+        'Nggak sabar nyobain menu baru',
+        'Duh, donutnya kliatan enak dari sini',
+        'Salt bread baru mateng, kriuk di luar soft di dalem',
+        'Aroma butter-nya bikin betah lama-lama',
+        'Owner-nya ramah banget ya',
+        'Duduk sendiri mikirin nambah order apa'
       ],
       hotspotGroup: [
         'Gw order banyak dikasih diskon dong!',
         'Tau gk sih, gw sering upload di sosmed klo ini enak banget',
         'Ngobrol makin seru kalau ada donut di meja',
         'Kumpul bareng, shokupan-nya dibagi rata ya',
-        'Traktir dong, kan abis gajian'
+        'Traktir dong, kan abis gajian',
+        'Split bill apa borongan nih kita?',
+        'Yang telat dateng bayar lebih, oke?',
+        'Grup chat penuh gara-gara nge-plan ke sini',
+        'Foto dulu sebelum donut abis',
+        'Rame-rame gini enaknya cobain semua menu'
       ],
       hotspotLogo: [
         'Halo, gw baby chef Shakies 👶🍳',
         'Jangan colek-colek, lagi bikin roti nih',
         'Geli woy 😆',
         'Woy jangan modusin gw',
-        'Udah ah, gw balik masak lagi'
+        'Udah ah, gw balik masak lagi',
+        'Eh siapa itu, jangan diem-diem colek',
+        'Baby chef report: semua aman terkendali',
+        'Nih logo apa alarm sih, dicolek mulu',
+        'Oke fine, senyum dikit deh buat kamu',
+        'Oke gw nyerah, sini gw kasih senyum extra'
       ]
     };
     const lastIndex = {}; // simpen index kalimat terakhir per hotspot, biar random-nya nggak ngulang 2x beruntun
-    const tapCount = {}; // hitung tap per hotspot, toast cuma muncul tiap kelipatan 3
+    const tapCount = {}; // hitung tap per hotspot, toast cuma muncul tiap kelipatan 5
     const stackContainers = {}; // 1 container stack per hotspot, nempel di atas tombolnya
 
     function pickMessage(spotId){

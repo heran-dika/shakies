@@ -514,10 +514,10 @@
       </div>
     </div>
 
-    <button class="hero-hotspot" id="hotspotDoor" aria-label="" style="left:43.9%; top:54.3%; width:13.5%; height:29.1%;"></button>
-    <button class="hero-hotspot" id="hotspotSolo" aria-label="" style="left:29.0%; top:54.3%; width:13.5%; height:29.1%;"></button>
-    <button class="hero-hotspot" id="hotspotGroup" aria-label="" style="left:58.8%; top:54.3%; width:13.4%; height:29.1%;"></button>
-    <button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:38.9%; top:9.9%; width:23.5%; height:19.6%;"></button>
+    <button class="hero-hotspot" id="hotspotDoor" aria-label="" style="left:45.7%; top:65.2%; width:13.0%; height:25.1%;"></button>
+    <button class="hero-hotspot" id="hotspotSolo" aria-label="" style="left:32.0%; top:65.2%; width:13.6%; height:25.1%;"></button>
+    <button class="hero-hotspot" id="hotspotGroup" aria-label="" style="left:58.7%; top:65.2%; width:13.0%; height:25.1%;"></button>
+    <button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:38.6%; top:29.6%; width:32.0%; height:23.1%;"></button>
   </div>
 
   <div class="links">
@@ -952,7 +952,7 @@
       return list[idx];
     }
 
-    function getStack(spotId, el){
+    function getStack(spotId, x, y){
       let stack = stackContainers[spotId];
       if(!stack){
         stack = document.createElement('div');
@@ -960,19 +960,18 @@
         document.body.appendChild(stack);
         stackContainers[spotId] = stack;
       }
-      // posisi anchor = tengah-atas tombol hotspot, di-refresh tiap trigger (jaga-jaga kalau layar di-resize/scroll)
-      const rect = el.getBoundingClientRect();
-      stack.style.left = (rect.left + rect.width / 2) + 'px';
-      stack.style.top = rect.top + 'px';
+      // anchor ke titik tap asli tiap kali (bukan posisi tombol) -- toast numpuk ngikutin lokasi jari, agak di atas dikit
+      stack.style.left = x + 'px';
+      stack.style.top = (y - 18) + 'px';
       return stack;
     }
 
-    function showToast(spotId, el, text){
-      const stack = getStack(spotId, el);
+    function showToast(spotId, x, y, text){
+      const stack = getStack(spotId, x, y);
       const toast = document.createElement('div');
       toast.className = 'egg-toast';
       toast.textContent = text;
-      stack.appendChild(toast); // ditambah di akhir -> nongol paling bawah (deket tombol), yang lama otomatis kedorong ke atas
+      stack.appendChild(toast); // ditambah di akhir -> nongol paling bawah (deket titik tap), yang lama otomatis kedorong ke atas
       toast.addEventListener('animationend', () => {
         toast.remove();
         if(stack.children.length === 0){
@@ -985,10 +984,17 @@
     Object.keys(MESSAGES).forEach((spotId) => {
       const el = document.getElementById(spotId);
       if(!el) return;
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
         tapCount[spotId] = (tapCount[spotId] || 0) + 1;
         if(tapCount[spotId] % 5 !== 0) return; // baru muncul toast tiap tap ke-5, ke-10, dst
-        showToast(spotId, el, pickMessage(spotId));
+        // clientX/Y ada di klik mouse & klik hasil tap (touch->click); fallback ke tengah tombol kalau nggak ada (misal trigger via keyboard)
+        let x = e.clientX, y = e.clientY;
+        if(!x && !y){
+          const rect = el.getBoundingClientRect();
+          x = rect.left + rect.width / 2;
+          y = rect.top + rect.height / 2;
+        }
+        showToast(spotId, x, y, pickMessage(spotId));
       });
     });
   })();

@@ -517,7 +517,7 @@
     <button class="hero-hotspot" id="hotspotDoor" aria-label="" style="left:43.9%; top:59.0%; width:13.5%; height:24.4%;"></button>
     <button class="hero-hotspot" id="hotspotSolo" aria-label="" style="left:29.0%; top:59.0%; width:13.5%; height:24.4%;"></button>
     <button class="hero-hotspot" id="hotspotGroup" aria-label="" style="left:58.8%; top:59.0%; width:13.4%; height:24.4%;"></button>
-    <button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:38.9%; top:18.0%; width:23.5%; height:19.6%;"></button>
+    <button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:41.6%; top:24.8%; width:17.8%; height:17.5%;"></button>
   </div>
 
   <div class="links">
@@ -677,6 +677,27 @@
     }
     return val;
   })();
+
+  // ===== Bersihin param UTM dari address bar setelah Umami sempat baca (biar URL keliatan bersih kayak buka index biasa) =====
+  // Umami script pake 'defer', jalan setelah parsing HTML selesai -- jadi UTM SENGAJA dibiarin dulu di URL
+  // pas parsing (lihat blok pendingOpen di atas), baru dibuang di sini setelah window 'load' + jeda tambahan,
+  // biar dipastiin Umami udah sempat kirim pageview dengan campaign data-nya sebelum URL berubah.
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const urlParams = new URLSearchParams(location.search);
+      let changed = false;
+      [...urlParams.keys()].forEach((key) => {
+        if(key.toLowerCase().startsWith('utm_')){
+          urlParams.delete(key);
+          changed = true;
+        }
+      });
+      if(changed){
+        const rest = urlParams.toString();
+        history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
+      }
+    }, 1500);
+  });
 
   // ===== Sheet generik (kertas nongol dari bawah, load iframe lokal - sama scope, no PWA capturing) =====
   // Dipakai Today's Menu (menu.html) & Kitchen Lab (embed eksternal)

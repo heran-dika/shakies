@@ -437,6 +437,11 @@
     cursor:pointer;
     -webkit-tap-highlight-color:transparent;
   }
+  /* Mode debug (?debug=hotspots di URL) -- bikin area hotspot kelihatan buat cross-check posisi di device asli */
+  body.debug-hotspots .hero-hotspot{
+    background:rgba(255,0,180,0.35);
+    border:2px solid rgba(255,0,180,0.8);
+  }
   .egg-toast-stack{
     position:fixed;
     z-index:1000;
@@ -509,10 +514,10 @@
       </div>
     </div>
 
-    <button class="hero-hotspot" id="hotspotDoor" aria-label="" style="left:42%; top:68%; width:16%; height:22%;"></button>
-    <button class="hero-hotspot" id="hotspotSolo" aria-label="" style="left:26%; top:72%; width:16%; height:18%;"></button>
-    <button class="hero-hotspot" id="hotspotGroup" aria-label="" style="left:60%; top:70%; width:20%; height:18%;"></button>
-    <button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:40%; top:32%; width:20%; height:15%;"></button>
+    <button class="hero-hotspot" id="hotspotDoor" aria-label="" style="left:43.9%; top:54.3%; width:13.5%; height:29.1%;"></button>
+    <button class="hero-hotspot" id="hotspotSolo" aria-label="" style="left:29.0%; top:54.3%; width:13.5%; height:29.1%;"></button>
+    <button class="hero-hotspot" id="hotspotGroup" aria-label="" style="left:58.8%; top:54.3%; width:13.4%; height:29.1%;"></button>
+    <button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:38.9%; top:9.9%; width:23.5%; height:19.6%;"></button>
   </div>
 
   <div class="links">
@@ -899,6 +904,11 @@
 
   // ===== Easter egg: tap hotspot di hero (pintu/orang sendiri/orang kelompok/logo) -> toast lucu random =====
   (function(){
+    // ?debug=hotspots -> kasih warna ke area hotspot biar kelihatan, buat cross-check posisi di device asli
+    if(new URLSearchParams(location.search).get('debug') === 'hotspots'){
+      document.body.classList.add('debug-hotspots');
+    }
+
     const MESSAGES = {
       hotspotDoor: [
         'Tok... tok... tok...',
@@ -977,7 +987,7 @@
       if(!el) return;
       el.addEventListener('click', () => {
         tapCount[spotId] = (tapCount[spotId] || 0) + 1;
-        if(tapCount[spotId] % 3 !== 0) return; // baru muncul toast tiap tap ke-3, ke-6, dst
+        if(tapCount[spotId] % 5 !== 0) return; // baru muncul toast tiap tap ke-5, ke-10, dst
         showToast(spotId, el, pickMessage(spotId));
       });
     });

@@ -10,15 +10,10 @@
         {
           "nama": "Shokupan Beef And cheese",
           "harga": 70000
-        }
-      ]
-    },
-    {
-      "kategori": "Dessert & Cake",
-      "items": [
+        },
         {
-          "nama": "Banana bread",
-          "harga": 12000
+          "nama": "Burger bun 10 pcs",
+          "harga": 40000
         }
       ]
     },
@@ -75,6 +70,6 @@
       ]
     }
   ],
-  "publishedAt": "2026-09-06T06:18:32.059Z",
-  "publishedBy": "dika"
+  "publishedAt": "2026-09-16T07:52:20.732Z",
+  "publishedBy": "suci"
 }

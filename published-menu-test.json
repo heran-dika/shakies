@@ -14,10 +14,39 @@
         {
           "nama": "es kopi americano",
           "harga": 10000
+        },
+        {
+          "nama": "matcha latte",
+          "harga": 20000
+        },
+        {
+          "nama": "salad",
+          "harga": 20000
+        },
+        {
+          "nama": "dirty latte",
+          "harga": 30000
+        }
+      ]
+    },
+    {
+      "kategori": "makanan",
+      "items": [
+        {
+          "nama": "ketporak",
+          "harga": 15000
+        },
+        {
+          "nama": "sei sapi",
+          "harga": 50000
+        },
+        {
+          "nama": "burger",
+          "harga": 55000
         }
       ]
     }
   ],
-  "publishedAt": "2026-09-19T02:59:21.847Z",
+  "publishedAt": "2026-09-19T03:09:47.192Z",
   "publishedBy": "dika"
 }

@@ -1,0 +1,23 @@
+{
+  "categories": [
+    {
+      "kategori": "Minuman",
+      "items": [
+        {
+          "nama": "Es Cendol Nangka",
+          "harga": 25000
+        },
+        {
+          "nama": "Es Cendol",
+          "harga": 20000
+        },
+        {
+          "nama": "es kopi americano",
+          "harga": 10000
+        }
+      ]
+    }
+  ],
+  "publishedAt": "2026-09-19T00:19:58.428Z",
+  "publishedBy": "dika"
+}

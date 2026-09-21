@@ -426,52 +426,6 @@
     right:10px;
     z-index:2;
   }
-  /* ===== Hero hotspot easter egg (tap pintu/orang/logo -> toast lucu) ===== */
-  .hero-hotspot{
-    position:absolute;
-    z-index:3; /* di atas gambar hero, di bawah welcome-overlay (z-index:4) */
-    background:transparent;
-    border:none;
-    padding:0;
-    margin:0;
-    cursor:pointer;
-    -webkit-tap-highlight-color:transparent;
-  }
-  /* Mode debug (?debug=hotspots di URL) -- bikin area hotspot kelihatan buat cross-check posisi di device asli */
-  body.debug-hotspots .hero-hotspot{
-    background:rgba(255,0,180,0.35);
-    border:2px solid rgba(255,0,180,0.8);
-  }
-  .egg-toast-stack{
-    position:fixed;
-    z-index:1000;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:6px;
-    transform:translate(-50%, -100%); /* nempel di anchor point, tumbuh ke atas seiring nambah anak */
-    pointer-events:none;
-  }
-  .egg-toast{
-    background:var(--navy);
-    color:var(--white);
-    font-size:0.8rem;
-    font-weight:600;
-    padding:8px 14px;
-    border-radius:14px;
-    box-shadow:0 4px 12px rgba(31,56,100,0.3);
-    white-space:nowrap;
-    max-width:70vw;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    animation: eggToastPop 1.8s ease forwards;
-  }
-  @keyframes eggToastPop{
-    0%{ opacity:0; transform:scale(0.9) translateY(6px); }
-    12%{ opacity:1; transform:scale(1) translateY(0); }
-    80%{ opacity:1; }
-    100%{ opacity:0; }
-  }
   .sprinkle-dot{
     position:fixed;
     width:12px; height:12px;
@@ -513,11 +467,6 @@
         </a>
       </div>
     </div>
-
-    <button class="hero-hotspot" id="hotspotDoor" aria-label="" style="left:43.9%; top:59.0%; width:13.5%; height:24.4%;"></button>
-    <button class="hero-hotspot" id="hotspotSolo" aria-label="" style="left:29.0%; top:59.0%; width:13.5%; height:24.4%;"></button>
-    <button class="hero-hotspot" id="hotspotGroup" aria-label="" style="left:58.8%; top:59.0%; width:13.4%; height:24.4%;"></button>
-    <button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:41.6%; top:24.8%; width:17.8%; height:17.5%;"></button>
   </div>
 
   <div class="links">
@@ -531,7 +480,7 @@
       </span>
     </a>
 
-    <a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="assets/reheat-instruction.png" target="_blank" rel="noopener">
+    <a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="?open=reheat" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">😊</span></span>
       <span class="link-text">
         <span class="title">Reheat Instruction</span>
@@ -539,7 +488,7 @@
       </span>
     </a>
 
-    <a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">
+    <a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="?open=pickup" target="_blank" rel="noopener">
       <span class="icon-badge"><span class="emoji">📍</span></span>
       <span class="link-text">
         <span class="title">Pick up Location</span>
@@ -678,27 +627,6 @@
     return val;
   })();
 
-  // ===== Bersihin param UTM dari address bar setelah Umami sempat baca (biar URL keliatan bersih kayak buka index biasa) =====
-  // Umami script pake 'defer', jalan setelah parsing HTML selesai -- jadi UTM SENGAJA dibiarin dulu di URL
-  // pas parsing (lihat blok pendingOpen di atas), baru dibuang di sini setelah window 'load' + jeda tambahan,
-  // biar dipastiin Umami udah sempat kirim pageview dengan campaign data-nya sebelum URL berubah.
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      const urlParams = new URLSearchParams(location.search);
-      let changed = false;
-      [...urlParams.keys()].forEach((key) => {
-        if(key.toLowerCase().startsWith('utm_')){
-          urlParams.delete(key);
-          changed = true;
-        }
-      });
-      if(changed){
-        const rest = urlParams.toString();
-        history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
-      }
-    }, 1500);
-  });
-
   // ===== Sheet generik (kertas nongol dari bawah, load iframe lokal - sama scope, no PWA capturing) =====
   // Dipakai Today's Menu (menu.html) & Kitchen Lab (embed eksternal)
   (function(){
@@ -801,7 +729,7 @@
     }
 
     reheatBtn.addEventListener('click', (e) => {
-      // ctrl/cmd/shift/middle-click tetap buka gambar di tab baru manual
+      // ctrl/cmd/shift/middle-click: buka landing page + popup (href=?open=reheat) di tab baru
       if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
       e.preventDefault();
       openReheat();
@@ -867,7 +795,7 @@
     }
 
     pickupBtn.addEventListener('click', (e) => {
-      // ctrl/cmd/shift/middle-click tetap buka Google Maps di tab baru manual
+      // ctrl/cmd/shift/middle-click: buka landing page + popup (href=?open=pickup) di tab baru
       if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
       e.preventDefault();
       openPickup();
@@ -921,123 +849,6 @@
 
     document.addEventListener('touchstart', handleTouch, { passive: true });
     document.addEventListener('touchmove', handleTouch, { passive: true });
-  })();
-
-  // ===== Easter egg: tap hotspot di hero (pintu/orang sendiri/orang kelompok/logo) -> toast lucu random =====
-  (function(){
-    // ?debug=hotspots -> kasih warna ke area hotspot biar kelihatan, buat cross-check posisi di device asli
-    if(new URLSearchParams(location.search).get('debug') === 'hotspots'){
-      document.body.classList.add('debug-hotspots');
-    }
-
-    const MESSAGES = {
-      hotspotDoor: [
-        'Tok... tok... tok...',
-        'Sabar, roti-nya baru keluar oven',
-        'Pelan-pelan say, kagee~t',
-        'Ngetok mulu, laper ya?',
-        'Oke oke, sebentar yaa',
-        'Bentar dong, tangannya lagi belepotan tepung',
-        'Kalem, entar pintunya lepas',
-        'Ini pintu apa drum, ditokin mulu',
-        'Buat order bisa klik menu bawah ya',
-        'Udah gw denger dari tadi kok'
-      ],
-      hotspotSolo: [
-        'Me time emang the best',
-        'Enaknya order apa ya?',
-        'Solo trip, ditemenin salt bread anget',
-        'Healing sambil ngunyah',
-        'Nggak sabar nyobain menu baru',
-        'Duh, donutnya kliatan enak dari sini',
-        'Salt bread baru mateng, kriuk di luar soft di dalem',
-        'Aroma butter-nya bikin betah lama-lama',
-        'Owner-nya ramah banget ya',
-        'Duduk sendiri mikirin nambah order apa'
-      ],
-      hotspotGroup: [
-        'Gw order banyak dikasih diskon dong!',
-        'Tau gk sih, gw sering upload di sosmed klo ini enak banget',
-        'Ngobrol makin seru kalau ada donut di meja',
-        'Kumpul bareng, shokupan-nya dibagi rata ya',
-        'Traktir dong, kan abis gajian',
-        'Split bill apa borongan nih kita?',
-        'Yang telat dateng bayar lebih, oke?',
-        'Grup chat penuh gara-gara nge-plan ke sini',
-        'Foto dulu sebelum donut abis',
-        'Rame-rame gini enaknya cobain semua menu'
-      ],
-      hotspotLogo: [
-        'Halo, gw baby chef Shakies 👶🍳',
-        'Jangan colek-colek, lagi bikin roti nih',
-        'Geli woy 😆',
-        'Woy jangan modusin gw',
-        'Udah ah, gw balik masak lagi',
-        'Eh siapa itu, jangan diem-diem colek',
-        'Baby chef report: semua aman terkendali',
-        'Nih logo apa alarm sih, dicolek mulu',
-        'Oke fine, senyum dikit deh buat kamu',
-        'Oke gw nyerah, sini gw kasih senyum extra'
-      ]
-    };
-    const lastIndex = {}; // simpen index kalimat terakhir per hotspot, biar random-nya nggak ngulang 2x beruntun
-    const tapCount = {}; // hitung tap per hotspot, toast cuma muncul tiap kelipatan 5
-    const stackContainers = {}; // 1 container stack per hotspot, nempel di atas tombolnya
-
-    function pickMessage(spotId){
-      const list = MESSAGES[spotId];
-      let idx;
-      do { idx = Math.floor(Math.random() * list.length); }
-      while(list.length > 1 && idx === lastIndex[spotId]);
-      lastIndex[spotId] = idx;
-      return list[idx];
-    }
-
-    function getStack(spotId, x, y){
-      let stack = stackContainers[spotId];
-      if(!stack){
-        stack = document.createElement('div');
-        stack.className = 'egg-toast-stack';
-        document.body.appendChild(stack);
-        stackContainers[spotId] = stack;
-      }
-      // anchor ke titik tap asli tiap kali (bukan posisi tombol) -- toast numpuk ngikutin lokasi jari, agak di atas dikit
-      stack.style.left = x + 'px';
-      stack.style.top = (y - 60) + 'px';
-      return stack;
-    }
-
-    function showToast(spotId, x, y, text){
-      const stack = getStack(spotId, x, y);
-      const toast = document.createElement('div');
-      toast.className = 'egg-toast';
-      toast.textContent = text;
-      stack.appendChild(toast); // ditambah di akhir -> nongol paling bawah (deket titik tap), yang lama otomatis kedorong ke atas
-      toast.addEventListener('animationend', () => {
-        toast.remove();
-        if(stack.children.length === 0){
-          stack.remove();
-          delete stackContainers[spotId];
-        }
-      });
-    }
-
-    Object.keys(MESSAGES).forEach((spotId) => {
-      const el = document.getElementById(spotId);
-      if(!el) return;
-      el.addEventListener('click', (e) => {
-        tapCount[spotId] = (tapCount[spotId] || 0) + 1;
-        if(tapCount[spotId] % 5 !== 0) return; // baru muncul toast tiap tap ke-5, ke-10, dst
-        // clientX/Y ada di klik mouse & klik hasil tap (touch->click); fallback ke tengah tombol kalau nggak ada (misal trigger via keyboard)
-        let x = e.clientX, y = e.clientY;
-        if(!x && !y){
-          const rect = el.getBoundingClientRect();
-          x = rect.left + rect.width / 2;
-          y = rect.top + rect.height / 2;
-        }
-        showToast(spotId, x, y, pickMessage(spotId));
-      });
-    });
   })();
 </script>
 

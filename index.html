@@ -169,7 +169,7 @@ padding:14px 18px;
 text-decoration:none;
 color:var(--navy);
 box-shadow:0 3px 0 var(--pill-shadow);
-transition:transform .12s ease, box-shadow .12s ease, opacity .75s ease;
+transition:transform .12s ease, box-shadow .12s ease, opacity .4s ease;
 opacity:0;
 }
 .link-btn.visible{
@@ -531,7 +531,7 @@ animation: sprinkleFly .55s ease-out forwards;
 </span>
 </a>
 
-<a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="assets/reheat-instruction.png" target="_blank" rel="noopener">
+<a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="?open=reheat" target="_blank" rel="noopener">
 <span class="icon-badge"><span class="emoji">😊</span></span>
 <span class="link-text">
 <span class="title">Reheat Instruction</span>
@@ -539,7 +539,7 @@ animation: sprinkleFly .55s ease-out forwards;
 </span>
 </a>
 
-<a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">
+<a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="?open=pickup" target="_blank" rel="noopener">
 <span class="icon-badge"><span class="emoji">📍</span></span>
 <span class="link-text">
 <span class="title">Pick up Location</span>
@@ -620,7 +620,7 @@ animation: sprinkleFly .55s ease-out forwards;
 // ===== Reveal tombol .links satu-satu pas discroll masuk viewport (bukan pas page load) =====
 (function(){
 const items = Array.from(document.querySelectorAll('.links .link-btn'));
-const STAGGER_MS = 90;
+const STAGGER_MS = 45;
 
 if(!('IntersectionObserver' in window)){
 // fallback browser lama: langsung tampilin semua, gak usah dipaksa nunggu observer
@@ -801,7 +801,7 @@ document.body.style.overflow = '';
 }
 
 reheatBtn.addEventListener('click', (e) => {
-// ctrl/cmd/shift/middle-click tetap buka gambar di tab baru manual
+// ctrl/cmd/shift/middle-click: buka landing page + popup (href=?open=reheat) di tab baru
 if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
 e.preventDefault();
 openReheat();
@@ -867,7 +867,7 @@ document.body.style.overflow = '';
 }
 
 pickupBtn.addEventListener('click', (e) => {
-// ctrl/cmd/shift/middle-click tetap buka Google Maps di tab baru manual
+// ctrl/cmd/shift/middle-click: buka landing page + popup (href=?open=pickup) di tab baru
 if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
 e.preventDefault();
 openPickup();

@@ -8,848 +8,1038 @@
 <link rel="icon" href="assets/logo.png">
 <script defer src="https://cloud.umami.is/script.js" data-website-id="7fadefac-a6c3-4c15-badd-aa26dadfdbe4"></script>
 <style>
-  :root{
-    --bg: #fdf0f0;
-    --pill: #f3aeb0;
-    --pill-shadow: #e89599;
-    --navy: #1f3864;
-    --navy-soft: #2c4372;
-    --white: #ffffff;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background: var(--bg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: var(--navy);
-    display:flex;
-    justify-content:center;
-  }
-  .page{
-    width:100%;
-    max-width:480px;
-    min-height:100vh;
-    background: var(--bg);
-    position:relative;
-  }
+:root{
+--bg: #fdf0f0;
+--pill: #f3aeb0;
+--pill-shadow: #e89599;
+--navy: #1f3864;
+--navy-soft: #2c4372;
+--white: #ffffff;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+background: var(--bg);
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+color: var(--navy);
+display:flex;
+justify-content:center;
+}
+.page{
+width:100%;
+max-width:480px;
+min-height:100vh;
+background: var(--bg);
+position:relative;
+}
 
-  /* ===== HERO (day/night crossfade) ===== */
-  .hero{
-    position:relative;
-    width:100%;
-    aspect-ratio: 750 / 1004;
-    overflow:hidden;
-  }
-  .hero img{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-  }
-  .hero .img-day{ z-index:1; }
-  .hero .img-night{ z-index:2; opacity:0; transition:opacity 3s ease; }
-  .hero.night .img-night{ opacity:1; }
-  .hero.no-anim .img-night{ transition:none; }
+/* ===== HERO (day/night crossfade) ===== */
+.hero{
+position:relative;
+width:100%;
+aspect-ratio: 750 / 1004;
+overflow:hidden;
+}
+.hero img{
+position:absolute;
+inset:0;
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+}
+.hero .img-day{ z-index:1; }
+.hero .img-night{ z-index:2; opacity:0; transition:opacity 3s ease; }
+.hero.night .img-night{ opacity:1; }
+.hero.no-anim .img-night{ transition:none; }
 
-  /* Tombol toggle siang/malam, icon bulat pojok kanan atas */
-  .daynight-toggle{
-    position:absolute;
-    top:16px;
-    right:16px;
-    z-index:5;
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    border:none;
-    background:rgba(255,255,255,0.9);
-    box-shadow:0 2px 8px rgba(31,56,100,0.25);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    font-size:20px;
-    padding:0;
-    -webkit-tap-highlight-color:transparent;
-  }
-  .daynight-toggle:active{ transform:scale(0.94); }
-  .daynight-toggle #toggleIcon{ display:inline-block; }
-  .daynight-toggle #toggleIcon.icon-spin{
-    animation: iconFlip .4s ease;
-  }
-  @keyframes iconFlip{
-    0%{ transform:rotate(0deg) scale(1); opacity:1; }
-    50%{ transform:rotate(180deg) scale(0.4); opacity:0; }
-    100%{ transform:rotate(360deg) scale(1); opacity:1; }
-  }
-  @media (hover:hover){
-    .daynight-toggle:hover{ animation: btnShake .4s ease; }
-  }
-  @keyframes btnShake{
-    0%,100%{ transform:translateX(0); }
-    25%{ transform:translateX(-3px); }
-    50%{ transform:translateX(3px); }
-    75%{ transform:translateX(-2px); }
-  }
+/* Tombol toggle siang/malam, icon bulat pojok kanan atas */
+.daynight-toggle{
+position:absolute;
+top:16px;
+right:16px;
+z-index:5;
+width:42px;
+height:42px;
+border-radius:50%;
+border:none;
+background:rgba(255,255,255,0.9);
+box-shadow:0 2px 8px rgba(31,56,100,0.25);
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+font-size:20px;
+padding:0;
+-webkit-tap-highlight-color:transparent;
+}
+.daynight-toggle:active{ transform:scale(0.94); }
+.daynight-toggle #toggleIcon{ display:inline-block; }
+.daynight-toggle #toggleIcon.icon-spin{
+animation: iconFlip .4s ease;
+}
+@keyframes iconFlip{
+0%{ transform:rotate(0deg) scale(1); opacity:1; }
+50%{ transform:rotate(180deg) scale(0.4); opacity:0; }
+100%{ transform:rotate(360deg) scale(1); opacity:1; }
+}
+@media (hover:hover){
+.daynight-toggle:hover{ animation: btnShake .4s ease; }
+}
+@keyframes btnShake{
+0%,100%{ transform:translateX(0); }
+25%{ transform:translateX(-3px); }
+50%{ transform:translateX(3px); }
+75%{ transform:translateX(-2px); }
+}
 
-  /* Card welcome dihapus — teks langsung di tengah hero, warna ikut siang/malam */
-  .welcome-overlay{
-    position:absolute;
-    top:20px;
-    left:0;
-    right:0;
-    z-index:4;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-    padding:0 60px; /* jarak aman dari tepi & tombol toggle */
-    pointer-events:none;
-  }
-  h1{
-    font-size:1.3rem;
-    margin:0 0 6px;
-    font-weight:700;
-    color:var(--navy);
-    text-shadow:0 1px 6px rgba(0,0,0,0.15);
-    transition:color 3s ease;
-  }
-  .subtitle{
-    margin:0 0 16px;
-    font-size:0.9rem;
-    color:var(--navy-soft);
-    text-shadow:0 1px 6px rgba(0,0,0,0.12);
-    transition:color 3s ease;
-  }
-  .hero.night h1{ color:#ffd9e6; }
-  .hero.night .subtitle{ color:#ffc9dc; }
-  .social-row{
-    display:flex;
-    justify-content:center;
-    gap:12px;
-    pointer-events:auto;
-  }
-  .social-row a{
-    width:38px; height:38px;
-    border-radius:50%;
-    background:var(--white);
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 2px 8px rgba(31,56,100,0.12);
-    color:var(--navy);
-    transition:transform .15s ease;
-    -webkit-tap-highlight-color:transparent;
-  }
-  .social-row a svg{ width:18px; height:18px; }
-  .social-row a:active{ transform:scale(0.92); }
-  @media (hover:hover){
-    .social-row a:hover{ animation: btnShake .4s ease; }
-  }
+/* Card welcome dihapus — teks langsung di tengah hero, warna ikut siang/malam */
+.welcome-overlay{
+position:absolute;
+top:20px;
+left:0;
+right:0;
+z-index:4;
+display:flex;
+flex-direction:column;
+align-items:center;
+text-align:center;
+padding:0 60px; /* jarak aman dari tepi & tombol toggle */
+pointer-events:none;
+}
+h1{
+font-size:1.3rem;
+margin:0 0 6px;
+font-weight:700;
+color:var(--navy);
+text-shadow:0 1px 6px rgba(0,0,0,0.15);
+transition:color 3s ease;
+}
+.subtitle{
+margin:0 0 16px;
+font-size:0.9rem;
+color:var(--navy-soft);
+text-shadow:0 1px 6px rgba(0,0,0,0.12);
+transition:color 3s ease;
+}
+.hero.night h1{ color:#ffd9e6; }
+.hero.night .subtitle{ color:#ffc9dc; }
+.social-row{
+display:flex;
+justify-content:center;
+gap:12px;
+pointer-events:auto;
+}
+.social-row a{
+width:38px; height:38px;
+border-radius:50%;
+background:var(--white);
+display:flex; align-items:center; justify-content:center;
+box-shadow:0 2px 8px rgba(31,56,100,0.12);
+color:var(--navy);
+transition:transform .15s ease;
+-webkit-tap-highlight-color:transparent;
+}
+.social-row a svg{ width:18px; height:18px; }
+.social-row a:active{ transform:scale(0.92); }
+@media (hover:hover){
+.social-row a:hover{ animation: btnShake .4s ease; }
+}
 
-  /* ===== LINKS ===== */
-  .links{
-    position:relative;
-    z-index:6;
-    margin-top:-28px; /* overlap ke atas hero, nutupin watermark AI generator di pojok gambar */
-    background:var(--bg);
-    border-radius:24px 24px 0 0;
-    box-shadow:0 -6px 16px rgba(31,56,100,0.08);
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    padding: 24px 18px 40px;
-  }
-  .link-btn{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    background:var(--pill);
-    border-radius:22px;
-    padding:14px 18px;
-    text-decoration:none;
-    color:var(--navy);
-    box-shadow:0 3px 0 var(--pill-shadow);
-    transition:transform .12s ease, box-shadow .12s ease, opacity .75s ease;
-    opacity:0;
-  }
-  .link-btn.visible{
-    opacity:1;
-  }
-  .link-btn:active{
-    transform:translateY(2px);
-    box-shadow:0 1px 0 var(--pill-shadow);
-  }
-  .link-btn.highlight{
-    position:relative;
-    animation: breatheOut 1.8s ease-out infinite;
-  }
-  @keyframes breatheOut{
-    0%{ box-shadow:0 3px 0 var(--pill-shadow), 0 0 0 0 rgba(31,56,100,0.4); }
-    100%{ box-shadow:0 3px 0 var(--pill-shadow), 0 0 16px 8px rgba(31,56,100,0); }
-  }
-  @media (hover:hover){
-    .link-btn:hover{
-      animation: btnWobble .5s ease;
-    }
-    .link-btn.highlight:hover{
-      animation: breatheOut 1.8s ease-out infinite, btnWobble .5s ease;
-    }
-  }
-  @keyframes btnWobble{
-    0%,100%{ transform:rotate(0deg); }
-    20%{ transform:rotate(-1deg); }
-    40%{ transform:rotate(1deg); }
-    60%{ transform:rotate(-0.6deg); }
-    80%{ transform:rotate(0.4deg); }
-  }
-  .badge-tag{
-    position:absolute;
-    top:-8px;
-    right:14px;
-    background:var(--navy);
-    color:var(--white);
-    font-size:0.65rem;
-    font-weight:700;
-    letter-spacing:.02em;
-    padding:2px 9px;
-    border-radius:10px;
-    box-shadow:0 2px 4px rgba(31,56,100,0.3);
-  }
-  .badge-tag .wave-letter{
-    display:inline-block;
-    animation: letterWave 1.1s ease-in-out infinite;
-  }
-  @keyframes letterWave{
-    0%,100%{ transform:translateY(0); }
-    30%{ transform:translateY(-3px); }
-  }
-  .icon-badge{
-    flex:0 0 auto;
-    width:42px; height:42px;
-    border-radius:50%;
-    background:var(--white);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 1px 4px rgba(31,56,100,0.15);
-  }
-  .icon-badge svg{ width:22px; height:22px; }
-  .icon-badge .emoji{ font-size:22px; line-height:1; }
-  .link-text{ text-align:center; flex:1; }
-  .link-text .title{ font-weight:700; font-size:1rem; display:block; }
-  .link-text .desc{ font-size:0.8rem; color:var(--navy-soft); display:block; margin-top:2px; }
-  footer{
-    text-align:center;
-    font-size:0.75rem;
-    color:var(--navy-soft);
-    opacity:0.7;
-    padding-bottom:24px;
-  }
+/* ===== LINKS ===== */
+.links{
+position:relative;
+z-index:6;
+margin-top:-28px; /* overlap ke atas hero, nutupin watermark AI generator di pojok gambar */
+background:var(--bg);
+border-radius:24px 24px 0 0;
+box-shadow:0 -6px 16px rgba(31,56,100,0.08);
+display:flex;
+flex-direction:column;
+gap:14px;
+padding: 24px 18px 40px;
+}
+.link-btn{
+display:flex;
+align-items:center;
+gap:14px;
+background:var(--pill);
+border-radius:22px;
+padding:14px 18px;
+text-decoration:none;
+color:var(--navy);
+box-shadow:0 3px 0 var(--pill-shadow);
+transition:transform .12s ease, box-shadow .12s ease, opacity .75s ease;
+opacity:0;
+}
+.link-btn.visible{
+opacity:1;
+}
+.link-btn:active{
+transform:translateY(2px);
+box-shadow:0 1px 0 var(--pill-shadow);
+}
+.link-btn.highlight{
+position:relative;
+animation: breatheOut 1.8s ease-out infinite;
+}
+@keyframes breatheOut{
+0%{ box-shadow:0 3px 0 var(--pill-shadow), 0 0 0 0 rgba(31,56,100,0.4); }
+100%{ box-shadow:0 3px 0 var(--pill-shadow), 0 0 16px 8px rgba(31,56,100,0); }
+}
+@media (hover:hover){
+.link-btn:hover{
+animation: btnWobble .5s ease;
+}
+.link-btn.highlight:hover{
+animation: breatheOut 1.8s ease-out infinite, btnWobble .5s ease;
+}
+}
+@keyframes btnWobble{
+0%,100%{ transform:rotate(0deg); }
+20%{ transform:rotate(-1deg); }
+40%{ transform:rotate(1deg); }
+60%{ transform:rotate(-0.6deg); }
+80%{ transform:rotate(0.4deg); }
+}
+.badge-tag{
+position:absolute;
+top:-8px;
+right:14px;
+background:var(--navy);
+color:var(--white);
+font-size:0.65rem;
+font-weight:700;
+letter-spacing:.02em;
+padding:2px 9px;
+border-radius:10px;
+box-shadow:0 2px 4px rgba(31,56,100,0.3);
+}
+.badge-tag .wave-letter{
+display:inline-block;
+animation: letterWave 1.1s ease-in-out infinite;
+}
+@keyframes letterWave{
+0%,100%{ transform:translateY(0); }
+30%{ transform:translateY(-3px); }
+}
+.icon-badge{
+flex:0 0 auto;
+width:42px; height:42px;
+border-radius:50%;
+background:var(--white);
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 1px 4px rgba(31,56,100,0.15);
+}
+.icon-badge svg{ width:22px; height:22px; }
+.icon-badge .emoji{ font-size:22px; line-height:1; }
+.link-text{ text-align:center; flex:1; }
+.link-text .title{ font-weight:700; font-size:1rem; display:block; }
+.link-text .desc{ font-size:0.8rem; color:var(--navy-soft); display:block; margin-top:2px; }
+footer{
+text-align:center;
+font-size:0.75rem;
+color:var(--navy-soft);
+opacity:0.7;
+padding-bottom:24px;
+}
 
-  /* ===== MENU SHEET (kertas nongol dari bawah, isinya menu.html lokal) ===== */
-  .sheet-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(31,56,100,0.45);
-    opacity:0;
-    visibility:hidden;
-    transition:opacity .25s ease, visibility .25s ease;
-    z-index:50;
-  }
-  .sheet-overlay.open{
-    opacity:1;
-    visibility:visible;
-  }
-  .menu-sheet{
-    position:fixed;
-    left:50%;
-    bottom:0;
-    width:100%;
-    max-width:480px;
-    height:90vh;
-    background:var(--bg);
-    border-radius:20px 20px 0 0;
-    box-shadow:0 -8px 30px rgba(31,56,100,0.35);
-    transform:translate(-50%, 100%) rotate(1.2deg);
-    transition:transform .42s cubic-bezier(.22,1,.36,1);
-    z-index:51;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-  }
-  .menu-sheet.open{
-    transform:translate(-50%, 0) rotate(0deg);
-  }
-  .sheet-handle{
-    width:40px;
-    height:4px;
-    background:var(--pill-shadow);
-    border-radius:2px;
-    margin:10px auto 0;
-    flex:0 0 auto;
-    touch-action:none; /* biar drag di handle ini nggak ikut nge-scroll halaman belakang */
-  }
-  .sheet-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:10px 16px 12px;
-    flex:0 0 auto;
-    touch-action:none;
-  }
-  .sheet-header-text .sheet-title{
-    font-weight:700;
-    font-size:1rem;
-    display:block;
-  }
-  .sheet-close{
-    border:none;
-    background:var(--pill);
-    color:var(--navy);
-    width:32px;height:32px;
-    border-radius:50%;
-    font-size:16px;
-    line-height:1;
-    cursor:pointer;
-    box-shadow:0 2px 0 var(--pill-shadow);
-    flex:0 0 auto;
-  }
-  .sheet-close:active{ transform:translateY(1px); box-shadow:none; }
-  .menu-sheet iframe{
-    flex:1 1 auto;
-    width:100%;
-    border:none;
-    background:var(--white);
-  }
+/* ===== MENU SHEET (kertas nongol dari bawah, isinya menu.html lokal) ===== */
+.sheet-overlay{
+position:fixed;
+inset:0;
+background:rgba(31,56,100,0.45);
+opacity:0;
+visibility:hidden;
+transition:opacity .25s ease, visibility .25s ease;
+z-index:50;
+}
+.sheet-overlay.open{
+opacity:1;
+visibility:visible;
+}
+.menu-sheet{
+position:fixed;
+left:50%;
+bottom:0;
+width:100%;
+max-width:480px;
+height:90vh;
+background:var(--bg);
+border-radius:20px 20px 0 0;
+box-shadow:0 -8px 30px rgba(31,56,100,0.35);
+transform:translate(-50%, 100%) rotate(1.2deg);
+transition:transform .42s cubic-bezier(.22,1,.36,1);
+z-index:51;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+.menu-sheet.open{
+transform:translate(-50%, 0) rotate(0deg);
+}
+.sheet-handle{
+width:40px;
+height:4px;
+background:var(--pill-shadow);
+border-radius:2px;
+margin:10px auto 0;
+flex:0 0 auto;
+touch-action:none; /* biar drag di handle ini nggak ikut nge-scroll halaman belakang */
+}
+.sheet-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:10px 16px 12px;
+flex:0 0 auto;
+touch-action:none;
+}
+.sheet-header-text .sheet-title{
+font-weight:700;
+font-size:1rem;
+display:block;
+}
+.sheet-close{
+border:none;
+background:var(--pill);
+color:var(--navy);
+width:32px;height:32px;
+border-radius:50%;
+font-size:16px;
+line-height:1;
+cursor:pointer;
+box-shadow:0 2px 0 var(--pill-shadow);
+flex:0 0 auto;
+}
+.sheet-close:active{ transform:translateY(1px); box-shadow:none; }
+.menu-sheet iframe{
+flex:1 1 auto;
+width:100%;
+border:none;
+background:var(--white);
+}
 
-  /* ===== LIGHTBOX (popup gambar Reheat Instruction) ===== */
-  .lightbox-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(31,56,100,0.72);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:32px 20px;
-    opacity:0;
-    visibility:hidden;
-    transition:opacity .2s ease, visibility .2s ease;
-    z-index:60;
-  }
-  .lightbox-overlay.open{
-    opacity:1;
-    visibility:visible;
-  }
-  .lightbox-inner{
-    position:relative;
-    max-width:100%;
-    max-height:100%;
-  }
-  .lightbox-inner img{
-    display:block;
-    max-width:100%;
-    max-height:80vh;
-    border-radius:16px;
-    box-shadow:0 8px 30px rgba(0,0,0,0.4);
-  }
-  .lightbox-close{
-    position:absolute;
-    top:-14px;
-    right:-14px;
-    width:32px;
-    height:32px;
-    border-radius:50%;
-    border:none;
-    background:var(--navy);
-    color:var(--white);
-    font-size:16px;
-    line-height:1;
-    cursor:pointer;
-    box-shadow:0 2px 8px rgba(0,0,0,0.35);
-  }
-  .lightbox-close:active{ transform:scale(0.94); }
+/* ===== LIGHTBOX (popup gambar Reheat Instruction) ===== */
+.lightbox-overlay{
+position:fixed;
+inset:0;
+background:rgba(31,56,100,0.72);
+display:flex;
+align-items:center;
+justify-content:center;
+padding:32px 20px;
+opacity:0;
+visibility:hidden;
+transition:opacity .2s ease, visibility .2s ease;
+z-index:60;
+}
+.lightbox-overlay.open{
+opacity:1;
+visibility:visible;
+}
+.lightbox-inner{
+position:relative;
+max-width:100%;
+max-height:100%;
+}
+.lightbox-inner img{
+display:block;
+max-width:100%;
+max-height:80vh;
+border-radius:16px;
+box-shadow:0 8px 30px rgba(0,0,0,0.4);
+}
+.lightbox-close{
+position:absolute;
+top:-14px;
+right:-14px;
+width:32px;
+height:32px;
+border-radius:50%;
+border:none;
+background:var(--navy);
+color:var(--white);
+font-size:16px;
+line-height:1;
+cursor:pointer;
+box-shadow:0 2px 8px rgba(0,0,0,0.35);
+}
+.lightbox-close:active{ transform:scale(0.94); }
 
-  /* ===== MAP LIGHTBOX (popup peta Pick up Location, bisa digeser/zoom) ===== */
-  .map-lightbox-inner{
-    position:relative;
-    width:100%;
-    max-width:440px;
-    background:var(--white);
-    border-radius:16px;
-    box-shadow:0 8px 30px rgba(0,0,0,0.4);
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-  }
-  .map-lightbox-inner iframe{
-    display:block;
-    width:100%;
-    height:52vh;
-    border:none;
-  }
-  .map-lightbox-action{
-    padding:12px;
-    flex:0 0 auto;
-    display:flex;
-    gap:8px;
-  }
-  .map-lightbox-action a,
-  .map-lightbox-action button{
-    display:block;
-    flex:1;
-    text-align:center;
-    background:var(--pill);
-    color:var(--navy);
-    font-weight:700;
-    font-size:0.9rem;
-    text-decoration:none;
-    padding:12px 8px;
-    border-radius:14px;
-    box-shadow:0 3px 0 var(--pill-shadow);
-    border:none;
-    font-family:inherit;
-    cursor:pointer;
-  }
-  .map-lightbox-action a:active,
-  .map-lightbox-action button:active{
-    transform:translateY(2px);
-    box-shadow:0 1px 0 var(--pill-shadow);
-  }
-  .map-lightbox-note{
-    margin:0;
-    padding:0 14px 14px;
-    font-size:11.5px;
-    line-height:1.45;
-    color:var(--navy-soft);
-    text-align:center;
-  }
-  .map-lightbox-inner .lightbox-close{
-    top:10px;
-    right:10px;
-    z-index:2;
-  }
-  .sprinkle-dot{
-    position:fixed;
-    width:12px; height:12px;
-    border-radius:50%;
-    pointer-events:none;
-    z-index:999;
-    animation: sprinkleFly .55s ease-out forwards;
-  }
-  @keyframes sprinkleFly{
-    0%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
-    100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); opacity:0; }
-  }
+/* ===== MAP LIGHTBOX (popup peta Pick up Location, bisa digeser/zoom) ===== */
+.map-lightbox-inner{
+position:relative;
+width:100%;
+max-width:440px;
+background:var(--white);
+border-radius:16px;
+box-shadow:0 8px 30px rgba(0,0,0,0.4);
+overflow:hidden;
+display:flex;
+flex-direction:column;
+}
+.map-lightbox-inner iframe{
+display:block;
+width:100%;
+height:52vh;
+border:none;
+}
+.map-lightbox-action{
+padding:12px;
+flex:0 0 auto;
+display:flex;
+gap:8px;
+}
+.map-lightbox-action a,
+.map-lightbox-action button{
+display:block;
+flex:1;
+text-align:center;
+background:var(--pill);
+color:var(--navy);
+font-weight:700;
+font-size:0.9rem;
+text-decoration:none;
+padding:12px 8px;
+border-radius:14px;
+box-shadow:0 3px 0 var(--pill-shadow);
+border:none;
+font-family:inherit;
+cursor:pointer;
+}
+.map-lightbox-action a:active,
+.map-lightbox-action button:active{
+transform:translateY(2px);
+box-shadow:0 1px 0 var(--pill-shadow);
+}
+.map-lightbox-note{
+margin:0;
+padding:0 14px 14px;
+font-size:11.5px;
+line-height:1.45;
+color:var(--navy-soft);
+text-align:center;
+}
+.map-lightbox-inner .lightbox-close{
+top:10px;
+right:10px;
+z-index:2;
+}
+/* ===== Hero hotspot easter egg (tap pintu/orang/logo -> toast lucu) ===== */
+.hero-hotspot{
+position:absolute;
+z-index:3; /* di atas gambar hero, di bawah welcome-overlay (z-index:4) */
+background:transparent;
+border:none;
+padding:0;
+margin:0;
+cursor:pointer;
+-webkit-tap-highlight-color:transparent;
+}
+/* Mode debug (?debug=hotspots di URL) -- bikin area hotspot kelihatan buat cross-check posisi di device asli */
+body.debug-hotspots .hero-hotspot{
+background:rgba(255,0,180,0.35);
+border:2px solid rgba(255,0,180,0.8);
+}
+.egg-toast-stack{
+position:fixed;
+z-index:1000;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:6px;
+transform:translate(-50%, -100%); /* nempel di anchor point, tumbuh ke atas seiring nambah anak */
+pointer-events:none;
+}
+.egg-toast{
+background:var(--navy);
+color:var(--white);
+font-size:0.8rem;
+font-weight:600;
+padding:8px 14px;
+border-radius:14px;
+box-shadow:0 4px 12px rgba(31,56,100,0.3);
+white-space:nowrap;
+max-width:70vw;
+overflow:hidden;
+text-overflow:ellipsis;
+animation: eggToastPop 1.8s ease forwards;
+}
+@keyframes eggToastPop{
+0%{ opacity:0; transform:scale(0.9) translateY(6px); }
+12%{ opacity:1; transform:scale(1) translateY(0); }
+80%{ opacity:1; }
+100%{ opacity:0; }
+}
+.sprinkle-dot{
+position:fixed;
+width:12px; height:12px;
+border-radius:50%;
+pointer-events:none;
+z-index:999;
+animation: sprinkleFly .55s ease-out forwards;
+}
+@keyframes sprinkleFly{
+0%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); opacity:0; }
+}
 </style>
 </head>
 <body>
 <div class="page">
 
-  <div class="hero" id="hero">
-    <img class="img-day" src="assets/shakies-day.jpg" alt="Shakies cafe siang">
-    <img class="img-night" src="assets/shakies-night.jpg" alt="Shakies cafe malam">
+<div class="hero" id="hero">
+<img class="img-day" src="assets/shakies-day.jpg" alt="Shakies cafe siang">
+<img class="img-night" src="assets/shakies-night.jpg" alt="Shakies cafe malam">
 
-    <button class="daynight-toggle" id="toggleBtn" data-umami-event="click_daynight_toggle" aria-label="Ubah suasana siang/malam"><span id="toggleIcon">🌙</span></button>
+<button class="daynight-toggle" id="toggleBtn" data-umami-event="click_daynight_toggle" aria-label="Ubah suasana siang/malam"><span id="toggleIcon">🌙</span></button>
 
-    <div class="welcome-overlay">
-      <h1>Welcome ShakiesLovers!</h1>
-      <p class="subtitle">Explore our virtual space</p>
-      <div class="social-row">
-        <a data-umami-event="click_social_whatsapp" href="https://wa.me/6287856857217?text=Hi%20Shakies,%20saya%20dengan..." aria-label="WhatsApp" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-        </a>
-        <a data-umami-event="click_social_instagram" href="https://www.instagram.com/shakies_co" aria-label="Instagram" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg>
-        </a>
-        <a data-umami-event="click_social_tiktok" href="https://www.tiktok.com/@shakies_co" aria-label="TikTok" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
-        </a>
-        <a data-umami-event="click_social_threads" href="https://www.threads.net/@shakies_co" aria-label="Threads" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.263 11.097c-.03-3.486-1.92-5.586-5.111-5.586-2.13 0-3.922.963-4.863 2.499l2.062 1.438c.535-.843 1.272-1.543 2.628-1.543 1.528 0 2.318.85 2.544 2.431a15 15 0 0 0-2.236-.173c-4.125 0-6.068 1.867-6.068 4.336s1.943 3.99 4.804 3.99c3.139 0 5.013-2.115 5.781-4.735.798.361 1.348 1.204 1.348 2.47 0 3.387-3.907 5.232-7.22 5.232-4.885 0-8.077-3.207-8.077-8.424 0-6.392 4.223-10.487 9.9-10.487 3.808 0 5.69 1.671 6.97 3.914l2.108-1.475C21.44 2.078 18.331 0 13.663 0 6.227 0 1.168 5.277 1.168 12.934c0 7 4.953 11.066 10.856 11.066 4.878 0 9.809-2.846 9.809-7.716 0-2.545-1.46-4.231-3.569-5.187m-6.33 4.855c-1.077 0-2.026-.512-2.026-1.453 0-1.483 1.822-1.934 3.606-1.934.678 0 1.34.045 1.927.173-.422 1.927-1.671 3.215-3.508 3.214Z"/></svg>
-        </a>
-      </div>
-    </div>
-  </div>
+<div class="welcome-overlay">
+<h1>Welcome ShakiesLovers!</h1>
+<p class="subtitle">Explore our virtual space</p>
+<div class="social-row">
+<a data-umami-event="click_social_whatsapp" href="https://wa.me/6287856857217?text=Hi%20Shakies,%20saya%20dengan..." aria-label="WhatsApp" target="_blank" rel="noopener">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+</a>
+<a data-umami-event="click_social_instagram" href="https://www.instagram.com/shakies_co" aria-label="Instagram" target="_blank" rel="noopener">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg>
+</a>
+<a data-umami-event="click_social_tiktok" href="https://www.tiktok.com/@shakies_co" aria-label="TikTok" target="_blank" rel="noopener">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+</a>
+<a data-umami-event="click_social_threads" href="https://www.threads.net/@shakies_co" aria-label="Threads" target="_blank" rel="noopener">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.263 11.097c-.03-3.486-1.92-5.586-5.111-5.586-2.13 0-3.922.963-4.863 2.499l2.062 1.438c.535-.843 1.272-1.543 2.628-1.543 1.528 0 2.318.85 2.544 2.431a15 15 0 0 0-2.236-.173c-4.125 0-6.068 1.867-6.068 4.336s1.943 3.99 4.804 3.99c3.139 0 5.013-2.115 5.781-4.735.798.361 1.348 1.204 1.348 2.47 0 3.387-3.907 5.232-7.22 5.232-4.885 0-8.077-3.207-8.077-8.424 0-6.392 4.223-10.487 9.9-10.487 3.808 0 5.69 1.671 6.97 3.914l2.108-1.475C21.44 2.078 18.331 0 13.663 0 6.227 0 1.168 5.277 1.168 12.934c0 7 4.953 11.066 10.856 11.066 4.878 0 9.809-2.846 9.809-7.716 0-2.545-1.46-4.231-3.569-5.187m-6.33 4.855c-1.077 0-2.026-.512-2.026-1.453 0-1.483 1.822-1.934 3.606-1.934.678 0 1.34.045 1.927.173-.422 1.927-1.671 3.215-3.508 3.214Z"/></svg>
+</a>
+</div>
+</div>
 
-  <div class="links">
+<button class="hero-hotspot" id="hotspotDoor" aria-label="" style="left:43.9%; top:59.0%; width:13.5%; height:24.4%;"></button>
+<button class="hero-hotspot" id="hotspotSolo" aria-label="" style="left:29.0%; top:59.0%; width:13.5%; height:24.4%;"></button>
+<button class="hero-hotspot" id="hotspotGroup" aria-label="" style="left:58.8%; top:59.0%; width:13.4%; height:24.4%;"></button>
+<button class="hero-hotspot" id="hotspotLogo" aria-label="" style="left:41.6%; top:24.8%; width:17.8%; height:17.5%;"></button>
+</div>
 
-    <a class="link-btn highlight" id="todaysMenuBtn" data-umami-event="click_todays_menu" data-sheet-src="menu.html" data-sheet-title="Today's Menu" href="menu.html" target="_blank" rel="noopener">
-      <span class="badge-tag"><span class="wave-letter" style="animation-delay:0.00s">L</span><span class="wave-letter" style="animation-delay:0.07s">i</span><span class="wave-letter" style="animation-delay:0.14s">m</span><span class="wave-letter" style="animation-delay:0.21s">i</span><span class="wave-letter" style="animation-delay:0.28s">t</span><span class="wave-letter" style="animation-delay:0.35s">e</span><span class="wave-letter" style="animation-delay:0.42s">d</span></span>
-      <span class="icon-badge"><span class="emoji">📋</span></span>
-      <span class="link-text">
-        <span class="title">Today's Menu</span>
-        <span class="desc">Stok terbatas & berubah tiap hari — cek dulu sebelum kehabisan!</span>
-      </span>
-    </a>
+<div class="links">
 
-    <a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="?open=reheat" target="_blank" rel="noopener">
-      <span class="icon-badge"><span class="emoji">😊</span></span>
-      <span class="link-text">
-        <span class="title">Reheat Instruction</span>
-        <span class="desc">Warm is more delicious</span>
-      </span>
-    </a>
+<a class="link-btn highlight" id="todaysMenuBtn" data-umami-event="click_todays_menu" data-sheet-src="menu.html" data-sheet-title="Today's Menu" href="menu.html" target="_blank" rel="noopener">
+<span class="badge-tag"><span class="wave-letter" style="animation-delay:0.00s">L</span><span class="wave-letter" style="animation-delay:0.07s">i</span><span class="wave-letter" style="animation-delay:0.14s">m</span><span class="wave-letter" style="animation-delay:0.21s">i</span><span class="wave-letter" style="animation-delay:0.28s">t</span><span class="wave-letter" style="animation-delay:0.35s">e</span><span class="wave-letter" style="animation-delay:0.42s">d</span></span>
+<span class="icon-badge"><span class="emoji">📋</span></span>
+<span class="link-text">
+<span class="title">Today's Menu</span>
+<span class="desc">Stok terbatas & berubah tiap hari — cek dulu sebelum kehabisan!</span>
+</span>
+</a>
 
-    <a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="?open=pickup" target="_blank" rel="noopener">
-      <span class="icon-badge"><span class="emoji">📍</span></span>
-      <span class="link-text">
-        <span class="title">Pick up Location</span>
-        <span class="desc">Currently, only delivery is available. Here's the map location for pick up delivery.</span>
-      </span>
-    </a>
+<a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="assets/reheat-instruction.png" target="_blank" rel="noopener">
+<span class="icon-badge"><span class="emoji">😊</span></span>
+<span class="link-text">
+<span class="title">Reheat Instruction</span>
+<span class="desc">Warm is more delicious</span>
+</span>
+</a>
 
-    <a class="link-btn" data-umami-event="click_google_review" href="https://g.page/r/CTp32r1466QKEBM/review" target="_blank" rel="noopener">
-      <span class="icon-badge"><span class="emoji">⭐</span></span>
-      <span class="link-text">
-        <span class="title">Write Review on Google Maps</span>
-        <span class="desc">You like our food, please tell everyone.</span>
-      </span>
-    </a>
+<a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">
+<span class="icon-badge"><span class="emoji">📍</span></span>
+<span class="link-text">
+<span class="title">Pick up Location</span>
+<span class="desc">Currently, only delivery is available. Here's the map location for pick up delivery.</span>
+</span>
+</a>
 
-    <a class="link-btn" id="kitchenLabBtn" data-umami-event="click_kitchen_lab" data-sheet-src="https://heran-dika.github.io/Shakies-Recipe/landing.html" data-sheet-title="Kitchen Lab" href="https://heran-dika.github.io/Shakies-Recipe/landing.html" target="_blank" rel="noopener">
-      <span class="icon-badge"><span class="emoji">🍵</span></span>
-      <span class="link-text">
-        <span class="title">Kitchen Lab</span>
-        <span class="desc">Sharing delicious recipe ala shakies</span>
-      </span>
-    </a>
+<a class="link-btn" data-umami-event="click_google_review" href="https://g.page/r/CTp32r1466QKEBM/review" target="_blank" rel="noopener">
+<span class="icon-badge"><span class="emoji">⭐</span></span>
+<span class="link-text">
+<span class="title">Write Review on Google Maps</span>
+<span class="desc">You like our food, please tell everyone.</span>
+</span>
+</a>
 
-    <a class="link-btn" data-umami-event="click_grabfood" href="https://food.grab.com/id/en/restaurant/shakies-galaxy-bekasi-blok-d2-no-11a-jl-lotus-raya-delivery/6-C7JEAPCDN3WXGJ?sourceID=20250627_102808_f15f347fb7114195836b30c1d3a736f1_MEXMPS" target="_blank" rel="noopener">
-      <span class="icon-badge"><span class="emoji">👜</span></span>
-      <span class="link-text">
-        <span class="title">Grab Food</span>
-        <span class="desc">Craving our fresh baked? Check our promo here..</span>
-      </span>
-    </a>
+<a class="link-btn" id="kitchenLabBtn" data-umami-event="click_kitchen_lab" data-sheet-src="https://heran-dika.github.io/Shakies-Recipe/landing.html" data-sheet-title="Kitchen Lab" href="https://heran-dika.github.io/Shakies-Recipe/landing.html" target="_blank" rel="noopener">
+<span class="icon-badge"><span class="emoji">🍵</span></span>
+<span class="link-text">
+<span class="title">Kitchen Lab</span>
+<span class="desc">Sharing delicious recipe ala shakies</span>
+</span>
+</a>
 
-    <a class="link-btn" data-umami-event="click_gofood" href="https://gofood.co.id/bekasi/restaurant/shakies-61134f0b-29b8-4972-a205-8570f6677b2e" target="_blank" rel="noopener">
-      <span class="icon-badge"><span class="emoji">🛒</span></span>
-      <span class="link-text">
-        <span class="title">gofood</span>
-        <span class="desc">Tap away to order freshly baked bread and cookies</span>
-      </span>
-    </a>
+<a class="link-btn" data-umami-event="click_grabfood" href="https://food.grab.com/id/en/restaurant/shakies-galaxy-bekasi-blok-d2-no-11a-jl-lotus-raya-delivery/6-C7JEAPCDN3WXGJ?sourceID=20250627_102808_f15f347fb7114195836b30c1d3a736f1_MEXMPS" target="_blank" rel="noopener">
+<span class="icon-badge"><span class="emoji">👜</span></span>
+<span class="link-text">
+<span class="title">Grab Food</span>
+<span class="desc">Craving our fresh baked? Check our promo here..</span>
+</span>
+</a>
 
-  </div>
+<a class="link-btn" data-umami-event="click_gofood" href="https://gofood.co.id/bekasi/restaurant/shakies-61134f0b-29b8-4972-a205-8570f6677b2e" target="_blank" rel="noopener">
+<span class="icon-badge"><span class="emoji">🛒</span></span>
+<span class="link-text">
+<span class="title">gofood</span>
+<span class="desc">Tap away to order freshly baked bread and cookies</span>
+</span>
+</a>
 
-  <footer>© SHAKIES 2023 — Bakery · Cookies · Drinks</footer>
+</div>
 
-  <div class="sheet-overlay" id="menuSheetOverlay"></div>
-  <div class="menu-sheet" id="menuSheet" role="dialog" aria-modal="true" aria-label="Today's Menu">
-    <div class="sheet-handle" id="sheetDragZone"></div>
-    <div class="sheet-header" id="sheetHeaderDragZone">
-      <div class="sheet-header-text">
-        <span class="sheet-title" id="sheetTitleText">Today's Menu</span>
-      </div>
-      <button class="sheet-close" id="menuSheetClose" aria-label="Tutup">✕</button>
-    </div>
-    <iframe id="menuSheetFrame" title="Today's Menu"></iframe>
-  </div>
+<footer>© SHAKIES 2023 — Bakery · Cookies · Drinks</footer>
 
-  <div class="lightbox-overlay" id="reheatOverlay">
-    <div class="lightbox-inner">
-      <button class="lightbox-close" id="reheatClose" aria-label="Tutup">✕</button>
-      <img src="assets/reheat-instruction.png" alt="Reheat Instruction">
-    </div>
-  </div>
+<div class="sheet-overlay" id="menuSheetOverlay"></div>
+<div class="menu-sheet" id="menuSheet" role="dialog" aria-modal="true" aria-label="Today's Menu">
+<div class="sheet-handle" id="sheetDragZone"></div>
+<div class="sheet-header" id="sheetHeaderDragZone">
+<div class="sheet-header-text">
+<span class="sheet-title" id="sheetTitleText">Today's Menu</span>
+</div>
+<button class="sheet-close" id="menuSheetClose" aria-label="Tutup">✕</button>
+</div>
+<iframe id="menuSheetFrame" title="Today's Menu"></iframe>
+</div>
 
-  <div class="lightbox-overlay" id="pickupOverlay">
-    <div class="map-lightbox-inner">
-      <button class="lightbox-close" id="pickupClose" aria-label="Tutup">✕</button>
-      <iframe src="https://www.google.com/maps?q=-6.2708882,106.9705108&z=17&output=embed" title="Lokasi Shakies" loading="lazy" allowfullscreen></iframe>
-      <div class="map-lightbox-action">
-        <a data-umami-event="click_pickup_maps" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">Buka di Maps</a>
-        <button type="button" id="copyAddressBtn" data-umami-event="click_pickup_copy_address">Salin Alamat</button>
-      </div>
-      <p class="map-lightbox-note">Untuk Shopee kirim & GoSend, titik lokasi biasanya udah pas dan bisa langsung dipilih. Kalau pakai Grab, titiknya kadang masih agak meleset — pastiin alamat detail di atas ditulis manual biar drivernya nggak nyasar.</p>
-    </div>
-  </div>
+<div class="lightbox-overlay" id="reheatOverlay">
+<div class="lightbox-inner">
+<button class="lightbox-close" id="reheatClose" aria-label="Tutup">✕</button>
+<img src="assets/reheat-instruction.png" alt="Reheat Instruction">
+</div>
+</div>
+
+<div class="lightbox-overlay" id="pickupOverlay">
+<div class="map-lightbox-inner">
+<button class="lightbox-close" id="pickupClose" aria-label="Tutup">✕</button>
+<iframe src="https://www.google.com/maps?q=-6.2708882,106.9705108&z=17&output=embed" title="Lokasi Shakies" loading="lazy" allowfullscreen></iframe>
+<div class="map-lightbox-action">
+<a data-umami-event="click_pickup_maps" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">Buka di Maps</a>
+<button type="button" id="copyAddressBtn" data-umami-event="click_pickup_copy_address">Salin Alamat</button>
+</div>
+<p class="map-lightbox-note">Untuk Shopee kirim & GoSend, titik lokasi biasanya udah pas dan bisa langsung dipilih. Kalau pakai Grab, titiknya kadang masih agak meleset — pastiin alamat detail di atas ditulis manual biar drivernya nggak nyasar.</p>
+</div>
+</div>
 
 </div>
 
 <script>
-  // ===== Reveal tombol .links satu-satu pas discroll masuk viewport (bukan pas page load) =====
-  (function(){
-    const items = Array.from(document.querySelectorAll('.links .link-btn'));
-    const STAGGER_MS = 90;
+// ===== Reveal tombol .links satu-satu pas discroll masuk viewport (bukan pas page load) =====
+(function(){
+const items = Array.from(document.querySelectorAll('.links .link-btn'));
+const STAGGER_MS = 90;
 
-    if(!('IntersectionObserver' in window)){
-      // fallback browser lama: langsung tampilin semua, gak usah dipaksa nunggu observer
-      items.forEach((el) => el.classList.add('visible'));
-      return;
-    }
+if(!('IntersectionObserver' in window)){
+// fallback browser lama: langsung tampilin semua, gak usah dipaksa nunggu observer
+items.forEach((el) => el.classList.add('visible'));
+return;
+}
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if(!entry.isIntersecting) return;
-        const idx = items.indexOf(entry.target);
-        setTimeout(() => entry.target.classList.add('visible'), idx * STAGGER_MS);
-        observer.unobserve(entry.target);
-      });
-    }, { threshold: 0.15 });
+const observer = new IntersectionObserver((entries) => {
+entries.forEach((entry) => {
+if(!entry.isIntersecting) return;
+const idx = items.indexOf(entry.target);
+setTimeout(() => entry.target.classList.add('visible'), idx * STAGGER_MS);
+observer.unobserve(entry.target);
+});
+}, { threshold: 0.15 });
 
-    items.forEach((el) => observer.observe(el));
-  })();
+items.forEach((el) => observer.observe(el));
+})();
 
-  const hero = document.getElementById('hero');
-  const btn = document.getElementById('toggleBtn');
-  const toggleIcon = document.getElementById('toggleIcon');
+const hero = document.getElementById('hero');
+const btn = document.getElementById('toggleBtn');
+const toggleIcon = document.getElementById('toggleIcon');
 
-  // Auto siang/malam berdasarkan jam device pengunjung: 06:00–17:59 siang, sisanya malam.
-  // Tombol tetap ada buat override manual kalau mau lihat versi lain.
-  const jamSekarang = new Date().getHours();
-  let isNight = (jamSekarang >= 18 || jamSekarang < 6);
-  if(isNight){
-    hero.classList.add('no-anim', 'night'); // no-anim: skip crossfade pas initial load, langsung tampil malam
-    toggleIcon.textContent = '☀️';
-    requestAnimationFrame(() => requestAnimationFrame(() => hero.classList.remove('no-anim')));
-  }
+// Auto siang/malam berdasarkan jam device pengunjung: 06:00–17:59 siang, sisanya malam.
+// Tombol tetap ada buat override manual kalau mau lihat versi lain.
+const jamSekarang = new Date().getHours();
+let isNight = (jamSekarang >= 18 || jamSekarang < 6);
+if(isNight){
+hero.classList.add('no-anim', 'night'); // no-anim: skip crossfade pas initial load, langsung tampil malam
+toggleIcon.textContent = '☀️';
+requestAnimationFrame(() => requestAnimationFrame(() => hero.classList.remove('no-anim')));
+}
 
-  btn.addEventListener('click', () => {
-    isNight = !isNight;
-    hero.classList.toggle('night', isNight);
-    toggleIcon.classList.remove('icon-spin');
-    void toggleIcon.offsetWidth; // force reflow biar animasi bisa di-restart tiap klik
-    toggleIcon.classList.add('icon-spin');
-    // Ganti simbol pas opacity lagi paling rendah (~separuh durasi animasi) biar transisinya mulus
-    setTimeout(() => { toggleIcon.textContent = isNight ? '☀️' : '🌙'; }, 200);
-  });
+btn.addEventListener('click', () => {
+isNight = !isNight;
+hero.classList.toggle('night', isNight);
+toggleIcon.classList.remove('icon-spin');
+void toggleIcon.offsetWidth; // force reflow biar animasi bisa di-restart tiap klik
+toggleIcon.classList.add('icon-spin');
+// Ganti simbol pas opacity lagi paling rendah (~separuh durasi animasi) biar transisinya mulus
+setTimeout(() => { toggleIcon.textContent = isNight ? '☀️' : '🌙'; }, 200);
+});
 
-  // ===== Param ?open=... (dibaca sekali di sini, dipakai bareng sheet & lightbox di bawah) =====
-  // Cuma key 'open' yang dibuang dari URL — parameter lain (mis. UTM) tetap dipertahankan,
-  // biar nggak kepotong sebelum sempat kebaca script Umami (defer, jalan setelah blok ini).
-  const pendingOpen = (function(){
-    const urlParams = new URLSearchParams(location.search);
-    const val = urlParams.get('open');
-    if(val){
-      urlParams.delete('open');
-      const rest = urlParams.toString();
-      history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
-    }
-    return val;
-  })();
+// ===== Param ?open=... (dibaca sekali di sini, dipakai bareng sheet & lightbox di bawah) =====
+// Cuma key 'open' yang dibuang dari URL — parameter lain (mis. UTM) tetap dipertahankan,
+// biar nggak kepotong sebelum sempat kebaca script Umami (defer, jalan setelah blok ini).
+const pendingOpen = (function(){
+const urlParams = new URLSearchParams(location.search);
+const val = urlParams.get('open');
+if(val){
+urlParams.delete('open');
+const rest = urlParams.toString();
+history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
+}
+return val;
+})();
 
-  // ===== Sheet generik (kertas nongol dari bawah, load iframe lokal - sama scope, no PWA capturing) =====
-  // Dipakai Today's Menu (menu.html) & Kitchen Lab (embed eksternal)
-  (function(){
-    const overlay = document.getElementById('menuSheetOverlay');
-    const sheet = document.getElementById('menuSheet');
-    const closeBtn = document.getElementById('menuSheetClose');
-    const frame = document.getElementById('menuSheetFrame');
-    const titleEl = document.getElementById('sheetTitleText');
-    let currentSrc = null;
+// ===== Bersihin param UTM dari address bar setelah Umami sempat baca (biar URL keliatan bersih kayak buka index biasa) =====
+// Umami script pake 'defer', jalan setelah parsing HTML selesai -- jadi UTM SENGAJA dibiarin dulu di URL
+// pas parsing (lihat blok pendingOpen di atas), baru dibuang di sini setelah window 'load' + jeda tambahan,
+// biar dipastiin Umami udah sempat kirim pageview dengan campaign data-nya sebelum URL berubah.
+window.addEventListener('load', () => {
+setTimeout(() => {
+const urlParams = new URLSearchParams(location.search);
+let changed = false;
+[...urlParams.keys()].forEach((key) => {
+if(key.toLowerCase().startsWith('utm_')){
+urlParams.delete(key);
+changed = true;
+}
+});
+if(changed){
+const rest = urlParams.toString();
+history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
+}
+}, 1500);
+});
 
-    function openSheet(src, title){
-      if(currentSrc !== src){ frame.src = src; currentSrc = src; }
-      if(title) titleEl.textContent = title;
-      overlay.classList.add('open');
-      sheet.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeSheet(){
-      overlay.classList.remove('open');
-      sheet.classList.remove('open');
-      document.body.style.overflow = '';
-    }
+// ===== Sheet generik (kertas nongol dari bawah, load iframe lokal - sama scope, no PWA capturing) =====
+// Dipakai Today's Menu (menu.html) & Kitchen Lab (embed eksternal)
+(function(){
+const overlay = document.getElementById('menuSheetOverlay');
+const sheet = document.getElementById('menuSheet');
+const closeBtn = document.getElementById('menuSheetClose');
+const frame = document.getElementById('menuSheetFrame');
+const titleEl = document.getElementById('sheetTitleText');
+let currentSrc = null;
 
-    document.querySelectorAll('[data-sheet-src]').forEach((trigger) => {
-      trigger.addEventListener('click', (e) => {
-        // biarin ctrl/cmd/shift/middle-click tetap buka tab baru manual
-        if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-        e.preventDefault();
-        openSheet(trigger.dataset.sheetSrc, trigger.dataset.sheetTitle);
-      });
-    });
-    overlay.addEventListener('click', closeSheet);
-    closeBtn.addEventListener('click', closeSheet);
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape') closeSheet();
-    });
-    window.addEventListener('message', (e) => {
-      if(e.data === 'shakies-menu-close') closeSheet();
-    });
+function openSheet(src, title){
+if(currentSrc !== src){ frame.src = src; currentSrc = src; }
+if(title) titleEl.textContent = title;
+overlay.classList.add('open');
+sheet.classList.add('open');
+document.body.style.overflow = 'hidden';
+}
+function closeSheet(){
+overlay.classList.remove('open');
+sheet.classList.remove('open');
+document.body.style.overflow = '';
+}
 
-    // ---- Geser ke bawah di handle/header buat nutup KERTASNYA AJA (bukan ikut
-    // nge-scroll/nutup halaman index di belakangnya) ----
-    let dragStartY = null, dragging = false, dragDelta = 0;
-    const CLOSE_THRESHOLD = 100;
+document.querySelectorAll('[data-sheet-src]').forEach((trigger) => {
+trigger.addEventListener('click', (e) => {
+// biarin ctrl/cmd/shift/middle-click tetap buka tab baru manual
+if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+e.preventDefault();
+openSheet(trigger.dataset.sheetSrc, trigger.dataset.sheetTitle);
+});
+});
+overlay.addEventListener('click', closeSheet);
+closeBtn.addEventListener('click', closeSheet);
+document.addEventListener('keydown', (e) => {
+if(e.key === 'Escape') closeSheet();
+});
+window.addEventListener('message', (e) => {
+if(e.data === 'shakies-menu-close') closeSheet();
+});
 
-    function dragStart(e){
-      dragging = true;
-      dragDelta = 0;
-      dragStartY = e.touches[0].clientY;
-      sheet.style.transition = 'none';
-    }
-    function dragMove(e){
-      if(!dragging) return;
-      const dy = e.touches[0].clientY - dragStartY;
-      dragDelta = Math.max(0, dy); // cuma boleh ditarik ke bawah
-      sheet.style.transform = `translate(-50%, ${dragDelta}px)`;
-      e.preventDefault(); // blok body ikut ke-scroll/bounce pas narik
-    }
-    function dragEnd(){
-      if(!dragging) return;
-      dragging = false;
-      sheet.style.transition = '';
-      sheet.style.transform = '';
-      if(dragDelta > CLOSE_THRESHOLD){
-        closeSheet();
-      }
-    }
-    [document.getElementById('sheetDragZone'), document.getElementById('sheetHeaderDragZone')].forEach(zone => {
-      zone.addEventListener('touchstart', dragStart, { passive:true });
-      zone.addEventListener('touchmove', dragMove, { passive:false });
-      zone.addEventListener('touchend', dragEnd);
-      zone.addEventListener('touchcancel', dragEnd);
-    });
+// ---- Geser ke bawah di handle/header buat nutup KERTASNYA AJA (bukan ikut
+// nge-scroll/nutup halaman index di belakangnya) ----
+let dragStartY = null, dragging = false, dragDelta = 0;
+const CLOSE_THRESHOLD = 100;
 
-    // ---- Kalau nyasar ke menu.html langsung (bukan lewat halaman ini), file itu
-    // bakal redirect balik kesini bawa ?open=menu — begitu nyampe, buka kertasnya
-    // otomatis biar animasi slide-up-nya tetep keliatan ----
-    const SHEET_MAP = {
-      menu: { src: 'menu.html', title: "Today's Menu" }
-    };
-    if(SHEET_MAP[pendingOpen]){
-      const target = SHEET_MAP[pendingOpen];
-      window.addEventListener('load', () => setTimeout(() => openSheet(target.src, target.title), 350));
-    }
-  })();
+function dragStart(e){
+dragging = true;
+dragDelta = 0;
+dragStartY = e.touches[0].clientY;
+sheet.style.transition = 'none';
+}
+function dragMove(e){
+if(!dragging) return;
+const dy = e.touches[0].clientY - dragStartY;
+dragDelta = Math.max(0, dy); // cuma boleh ditarik ke bawah
+sheet.style.transform = `translate(-50%, ${dragDelta}px)`;
+e.preventDefault(); // blok body ikut ke-scroll/bounce pas narik
+}
+function dragEnd(){
+if(!dragging) return;
+dragging = false;
+sheet.style.transition = '';
+sheet.style.transform = '';
+if(dragDelta > CLOSE_THRESHOLD){
+closeSheet();
+}
+}
+[document.getElementById('sheetDragZone'), document.getElementById('sheetHeaderDragZone')].forEach(zone => {
+zone.addEventListener('touchstart', dragStart, { passive:true });
+zone.addEventListener('touchmove', dragMove, { passive:false });
+zone.addEventListener('touchend', dragEnd);
+zone.addEventListener('touchcancel', dragEnd);
+});
 
-  // ===== Reheat Instruction lightbox (popup gambar, bukan buka tab IG) =====
-  (function(){
-    const reheatBtn = document.getElementById('reheatBtn');
-    const reheatOverlay = document.getElementById('reheatOverlay');
-    const reheatClose = document.getElementById('reheatClose');
+// ---- Kalau nyasar ke menu.html langsung (bukan lewat halaman ini), file itu
+// bakal redirect balik kesini bawa ?open=menu — begitu nyampe, buka kertasnya
+// otomatis biar animasi slide-up-nya tetep keliatan ----
+const SHEET_MAP = {
+menu: { src: 'menu.html', title: "Today's Menu" }
+};
+if(SHEET_MAP[pendingOpen]){
+const target = SHEET_MAP[pendingOpen];
+window.addEventListener('load', () => setTimeout(() => openSheet(target.src, target.title), 350));
+}
+})();
 
-    function openReheat(){
-      reheatOverlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeReheat(){
-      reheatOverlay.classList.remove('open');
-      document.body.style.overflow = '';
-    }
+// ===== Reheat Instruction lightbox (popup gambar, bukan buka tab IG) =====
+(function(){
+const reheatBtn = document.getElementById('reheatBtn');
+const reheatOverlay = document.getElementById('reheatOverlay');
+const reheatClose = document.getElementById('reheatClose');
 
-    reheatBtn.addEventListener('click', (e) => {
-      // ctrl/cmd/shift/middle-click: buka landing page + popup (href=?open=reheat) di tab baru
-      if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-      e.preventDefault();
-      openReheat();
-    });
-    reheatOverlay.addEventListener('click', (e) => {
-      if(e.target === reheatOverlay) closeReheat(); // klik bg gelap = nutup
-    });
-    reheatClose.addEventListener('click', closeReheat);
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape') closeReheat();
-    });
+function openReheat(){
+reheatOverlay.classList.add('open');
+document.body.style.overflow = 'hidden';
+}
+function closeReheat(){
+reheatOverlay.classList.remove('open');
+document.body.style.overflow = '';
+}
 
-    // Link/QR langsung: index.html?open=reheat
-    if(pendingOpen === 'reheat'){
-      window.addEventListener('load', () => setTimeout(openReheat, 350));
-    }
-  })();
+reheatBtn.addEventListener('click', (e) => {
+// ctrl/cmd/shift/middle-click tetap buka gambar di tab baru manual
+if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+e.preventDefault();
+openReheat();
+});
+reheatOverlay.addEventListener('click', (e) => {
+if(e.target === reheatOverlay) closeReheat(); // klik bg gelap = nutup
+});
+reheatClose.addEventListener('click', closeReheat);
+document.addEventListener('keydown', (e) => {
+if(e.key === 'Escape') closeReheat();
+});
 
-  // ===== Pick up Location lightbox (peta interaktif, bisa digeser/zoom) =====
-  (function(){
-    const pickupBtn = document.getElementById('pickupBtn');
-    const pickupOverlay = document.getElementById('pickupOverlay');
-    const pickupClose = document.getElementById('pickupClose');
-    const copyAddressBtn = document.getElementById('copyAddressBtn');
-    const PICKUP_ADDRESS = 'SHAKIES - Jl. Lotus Raya Blok D2 no.11A';
+// Link/QR langsung: index.html?open=reheat
+if(pendingOpen === 'reheat'){
+window.addEventListener('load', () => setTimeout(openReheat, 350));
+}
+})();
 
-    async function copyAddress(){
-      try{
-        if(navigator.clipboard && window.isSecureContext){
-          await navigator.clipboard.writeText(PICKUP_ADDRESS);
-        } else {
-          // Fallback buat browser/webview lama yang gak support Clipboard API
-          const ta = document.createElement('textarea');
-          ta.value = PICKUP_ADDRESS;
-          ta.style.position = 'fixed';
-          ta.style.opacity = '0';
-          document.body.appendChild(ta);
-          ta.focus();
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-        }
-        const original = copyAddressBtn.textContent;
-        copyAddressBtn.textContent = 'Tersalin! ✓';
-        copyAddressBtn.disabled = true;
-        setTimeout(() => {
-          copyAddressBtn.textContent = original;
-          copyAddressBtn.disabled = false;
-        }, 1500);
-      } catch(e){
-        alert('Alamat: ' + PICKUP_ADDRESS);
-      }
-    }
-    copyAddressBtn.addEventListener('click', copyAddress);
+// ===== Pick up Location lightbox (peta interaktif, bisa digeser/zoom) =====
+(function(){
+const pickupBtn = document.getElementById('pickupBtn');
+const pickupOverlay = document.getElementById('pickupOverlay');
+const pickupClose = document.getElementById('pickupClose');
+const copyAddressBtn = document.getElementById('copyAddressBtn');
+const PICKUP_ADDRESS = 'SHAKIES - Jl. Lotus Raya Blok D2 no.11A';
 
-    function openPickup(){
-      pickupOverlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closePickup(){
-      pickupOverlay.classList.remove('open');
-      document.body.style.overflow = '';
-    }
+async function copyAddress(){
+try{
+if(navigator.clipboard && window.isSecureContext){
+await navigator.clipboard.writeText(PICKUP_ADDRESS);
+} else {
+// Fallback buat browser/webview lama yang gak support Clipboard API
+const ta = document.createElement('textarea');
+ta.value = PICKUP_ADDRESS;
+ta.style.position = 'fixed';
+ta.style.opacity = '0';
+document.body.appendChild(ta);
+ta.focus();
+ta.select();
+document.execCommand('copy');
+document.body.removeChild(ta);
+}
+const original = copyAddressBtn.textContent;
+copyAddressBtn.textContent = 'Tersalin! ✓';
+copyAddressBtn.disabled = true;
+setTimeout(() => {
+copyAddressBtn.textContent = original;
+copyAddressBtn.disabled = false;
+}, 1500);
+} catch(e){
+alert('Alamat: ' + PICKUP_ADDRESS);
+}
+}
+copyAddressBtn.addEventListener('click', copyAddress);
 
-    pickupBtn.addEventListener('click', (e) => {
-      // ctrl/cmd/shift/middle-click: buka landing page + popup (href=?open=pickup) di tab baru
-      if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-      e.preventDefault();
-      openPickup();
-    });
-    pickupOverlay.addEventListener('click', (e) => {
-      if(e.target === pickupOverlay) closePickup(); // klik bg gelap = nutup
-    });
-    pickupClose.addEventListener('click', closePickup);
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape') closePickup();
-    });
+function openPickup(){
+pickupOverlay.classList.add('open');
+document.body.style.overflow = 'hidden';
+}
+function closePickup(){
+pickupOverlay.classList.remove('open');
+document.body.style.overflow = '';
+}
 
-    // Link/QR langsung: index.html?open=pickup
-    if(pendingOpen === 'pickup'){
-      window.addEventListener('load', () => setTimeout(openPickup, 350));
-    }
-  })();
+pickupBtn.addEventListener('click', (e) => {
+// ctrl/cmd/shift/middle-click tetap buka Google Maps di tab baru manual
+if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+e.preventDefault();
+openPickup();
+});
+pickupOverlay.addEventListener('click', (e) => {
+if(e.target === pickupOverlay) closePickup(); // klik bg gelap = nutup
+});
+pickupClose.addEventListener('click', closePickup);
+document.addEventListener('keydown', (e) => {
+if(e.key === 'Escape') closePickup();
+});
 
-  // ===== Sprinkle effect pas layar disentuh/di-scroll — global, bukan cuma di tombol =====
-  // Di-throttle biar nggak nge-spam elemen DOM pas jari geser cepat (touchmove nembak
-  // puluhan kali per detik kalau nggak dibatasi).
-  (function(){
-    const colors = ['var(--navy)', 'var(--pill-shadow)', '#ffffff'];
-    const THROTTLE_MS = 25;
-    let lastSpawn = 0;
+// Link/QR langsung: index.html?open=pickup
+if(pendingOpen === 'pickup'){
+window.addEventListener('load', () => setTimeout(openPickup, 350));
+}
+})();
 
-    function spawnSprinkle(x, y){
-      for(let i = 0; i < 2; i++){
-        const dot = document.createElement('span');
-        dot.className = 'sprinkle-dot';
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 80 + Math.random() * 72;
-        dot.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
-        dot.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
-        dot.style.left = x + 'px';
-        dot.style.top = y + 'px';
-        dot.style.background = colors[i % colors.length];
-        document.body.appendChild(dot);
-        dot.addEventListener('animationend', () => dot.remove());
-      }
-    }
+// ===== Sprinkle effect pas layar disentuh/di-scroll — global, bukan cuma di tombol =====
+// Di-throttle biar nggak nge-spam elemen DOM pas jari geser cepat (touchmove nembak
+// puluhan kali per detik kalau nggak dibatasi).
+(function(){
+const colors = ['var(--navy)', 'var(--pill-shadow)', '#ffffff'];
+const THROTTLE_MS = 25;
+let lastSpawn = 0;
 
-    function handleTouch(e){
-      const now = Date.now();
-      if(now - lastSpawn < THROTTLE_MS) return;
-      const t = e.touches[0];
-      if(!t) return;
-      lastSpawn = now;
-      spawnSprinkle(t.clientX, t.clientY);
-    }
+function spawnSprinkle(x, y){
+for(let i = 0; i < 2; i++){
+const dot = document.createElement('span');
+dot.className = 'sprinkle-dot';
+const angle = Math.random() * Math.PI * 2;
+const dist = 80 + Math.random() * 72;
+dot.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+dot.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+dot.style.left = x + 'px';
+dot.style.top = y + 'px';
+dot.style.background = colors[i % colors.length];
+document.body.appendChild(dot);
+dot.addEventListener('animationend', () => dot.remove());
+}
+}
 
-    document.addEventListener('touchstart', handleTouch, { passive: true });
-    document.addEventListener('touchmove', handleTouch, { passive: true });
-  })();
+function handleTouch(e){
+const now = Date.now();
+if(now - lastSpawn < THROTTLE_MS) return;
+const t = e.touches[0];
+if(!t) return;
+lastSpawn = now;
+spawnSprinkle(t.clientX, t.clientY);
+}
+
+document.addEventListener('touchstart', handleTouch, { passive: true });
+document.addEventListener('touchmove', handleTouch, { passive: true });
+})();
+
+// ===== Easter egg: tap hotspot di hero (pintu/orang sendiri/orang kelompok/logo) -> toast lucu random =====
+(function(){
+// ?debug=hotspots -> kasih warna ke area hotspot biar kelihatan, buat cross-check posisi di device asli
+if(new URLSearchParams(location.search).get('debug') === 'hotspots'){
+document.body.classList.add('debug-hotspots');
+}
+
+const MESSAGES = {
+hotspotDoor: [
+'Tok... tok... tok...',
+'Sabar, roti-nya baru keluar oven',
+'Pelan-pelan say, kagee~t',
+'Ngetok mulu, laper ya?',
+'Oke oke, sebentar yaa',
+'Bentar dong, tangannya lagi belepotan tepung',
+'Kalem, entar pintunya lepas',
+'Ini pintu apa drum, ditokin mulu',
+'Buat order bisa klik menu bawah ya',
+'Udah gw denger dari tadi kok'
+],
+hotspotSolo: [
+'Me time emang the best',
+'Enaknya order apa ya?',
+'Solo trip, ditemenin salt bread anget',
+'Healing sambil ngunyah',
+'Nggak sabar nyobain menu baru',
+'Duh, donutnya kliatan enak dari sini',
+'Salt bread baru mateng, kriuk di luar soft di dalem',
+'Aroma butter-nya bikin betah lama-lama',
+'Owner-nya ramah banget ya',
+'Duduk sendiri mikirin nambah order apa'
+],
+hotspotGroup: [
+'Gw order banyak dikasih diskon dong!',
+'Tau gk sih, gw sering upload di sosmed klo ini enak banget',
+'Ngobrol makin seru kalau ada donut di meja',
+'Kumpul bareng, shokupan-nya dibagi rata ya',
+'Traktir dong, kan abis gajian',
+'Split bill apa borongan nih kita?',
+'Yang telat dateng bayar lebih, oke?',
+'Grup chat penuh gara-gara nge-plan ke sini',
+'Foto dulu sebelum donut abis',
+'Rame-rame gini enaknya cobain semua menu'
+],
+hotspotLogo: [
+'Halo, gw baby chef Shakies 👶🍳',
+'Jangan colek-colek, lagi bikin roti nih',
+'Geli woy 😆',
+'Woy jangan modusin gw',
+'Udah ah, gw balik masak lagi',
+'Eh siapa itu, jangan diem-diem colek',
+'Baby chef report: semua aman terkendali',
+'Nih logo apa alarm sih, dicolek mulu',
+'Oke fine, senyum dikit deh buat kamu',
+'Oke gw nyerah, sini gw kasih senyum extra'
+]
+};
+const lastIndex = {}; // simpen index kalimat terakhir per hotspot, biar random-nya nggak ngulang 2x beruntun
+const tapCount = {}; // hitung tap per hotspot, toast cuma muncul tiap kelipatan 5
+const stackContainers = {}; // 1 container stack per hotspot, nempel di atas tombolnya
+
+function pickMessage(spotId){
+const list = MESSAGES[spotId];
+let idx;
+do { idx = Math.floor(Math.random() * list.length); }
+while(list.length > 1 && idx === lastIndex[spotId]);
+lastIndex[spotId] = idx;
+return list[idx];
+}
+
+function getStack(spotId, x, y){
+let stack = stackContainers[spotId];
+if(!stack){
+stack = document.createElement('div');
+stack.className = 'egg-toast-stack';
+document.body.appendChild(stack);
+stackContainers[spotId] = stack;
+}
+// anchor ke titik tap asli tiap kali (bukan posisi tombol) -- toast numpuk ngikutin lokasi jari, agak di atas dikit
+stack.style.left = x + 'px';
+      stack.style.top = (y - 18) + 'px';
+      stack.style.top = (y - 60) + 'px';
+return stack;
+}
+
+function showToast(spotId, x, y, text){
+const stack = getStack(spotId, x, y);
+const toast = document.createElement('div');
+toast.className = 'egg-toast';
+toast.textContent = text;
+stack.appendChild(toast); // ditambah di akhir -> nongol paling bawah (deket titik tap), yang lama otomatis kedorong ke atas
+toast.addEventListener('animationend', () => {
+toast.remove();
+if(stack.children.length === 0){
+stack.remove();
+delete stackContainers[spotId];
+}
+});
+}
+
+Object.keys(MESSAGES).forEach((spotId) => {
+const el = document.getElementById(spotId);
+if(!el) return;
+el.addEventListener('click', (e) => {
+tapCount[spotId] = (tapCount[spotId] || 0) + 1;
+if(tapCount[spotId] % 5 !== 0) return; // baru muncul toast tiap tap ke-5, ke-10, dst
+// clientX/Y ada di klik mouse & klik hasil tap (touch->click); fallback ke tengah tombol kalau nggak ada (misal trigger via keyboard)
+let x = e.clientX, y = e.clientY;
+if(!x && !y){
+const rect = el.getBoundingClientRect();
+x = rect.left + rect.width / 2;
+y = rect.top + rect.height / 2;
+}
+showToast(spotId, x, y, pickMessage(spotId));
+});
+});
+})();
 </script>
 
 </body>

@@ -10,6 +10,23 @@
         {
           "nama": "Shokupan Beef And cheese",
           "harga": 70000
+        },
+        {
+          "nama": "Shokupan Gandum",
+          "harga": 50000
+        },
+        {
+          "nama": "Pumpkin loaf (vegetarian bread)",
+          "harga": 45000
+        }
+      ]
+    },
+    {
+      "kategori": "Dessert & Cake",
+      "items": [
+        {
+          "nama": "Burnt Cheese Cake",
+          "harga": 33000
         }
       ]
     },
@@ -40,15 +57,32 @@
       ]
     },
     {
+      "kategori": "Salt Bread",
+      "items": [
+        {
+          "nama": "Salt Bread Original",
+          "harga": 16000
+        },
+        {
+          "nama": "Salt Bread Egg mayo",
+          "harga": 28000
+        }
+      ]
+    },
+    {
       "kategori": "Sourdough",
       "items": [
         {
           "nama": "Cranberry cream cheese (large)",
           "harga": 30000
+        },
+        {
+          "nama": "Cranberry cream cheese (small)",
+          "harga": 15000
         }
       ]
     }
   ],
-  "publishedAt": "2026-09-24T10:17:04.095Z",
-  "publishedBy": "dika"
+  "publishedAt": "2026-09-25T02:28:34.299Z",
+  "publishedBy": "suci"
 }

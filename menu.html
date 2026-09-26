@@ -153,16 +153,9 @@
   </div>
 
 <script>
-// Endpoint publik ini SENGAJA cuma manggil get_published_menu (server) ATAU baca
-// published-menu.json (file statis) — nggak pernah manggil get_menu/get_orders,
-// jadi data order & customer nggak pernah nyampe ke halaman ini.
-const API_URL = 'https://script.google.com/macros/s/AKfycbwfOYUtAPhnE_KP3ya07IPx3RNqNZwNQlxYEdd65y0dJFae1A9eVfG9gR-MzD02txZDeg/exec';
-
-// File statis di-commit otomatis oleh POS tiap kali tombol Publish dipencet (lihat
-// Code_production.gs -> commitPublishedMenuToGitHub, 6 Sep 2026). Same-origin, di-serve
-// GitHub Pages -- kalau file ini ada & fresh, gak ada round-trip ke Apps Script sama
-// sekali. Kalau gagal (misal belum pernah kena publish versi baru), fallback ke API_URL
-// seperti sebelumnya.
+// Data menu dibaca dari file statis (published-menu.json), same-origin, di-serve
+// GitHub Pages -- nggak ada round-trip ke backend sama sekali. File ini di-commit
+// otomatis tiap kali menu di-publish dari POS.
 const STATIC_URL = './published-menu.json';
 const CACHE_KEY = 'shakies_published_menu_cache_v1';
 
@@ -357,13 +350,6 @@ async function fetchStatic(){
   return data;
 }
 
-async function fetchLive(){
-  const res = await fetch(API_URL + '?action=get_published_menu');
-  const json = await res.json();
-  if(json.status !== 'ok') throw new Error(json.message || 'Gagal memuat');
-  return json.data;
-}
-
 async function load(){
   const bodyEl = document.getElementById('kBody');
   const cached = readCache();
@@ -375,14 +361,14 @@ async function load(){
     renderedFromCache = true;
   }
 
-  // 2. Ambil data terbaru: coba file statis dulu (same-origin, ini yang bikin nggak
-  //    ada round-trip ke Apps Script). Kalau gagal (belum pernah di-publish lewat
-  //    versi baru, atau file belum ke-generate), fallback ke API GAS seperti dulu.
+  // 2. Ambil data terbaru dari file statis. Kalau gagal (belum pernah di-publish,
+  //    file belum ke-generate, dll), pakai cache lokal kalau ada, atau tampilkan
+  //    error state.
   let fresh = null;
   try{
     fresh = await fetchStatic();
   } catch(e){
-    try{ fresh = await fetchLive(); } catch(e2){ fresh = null; }
+    fresh = null;
   }
 
   if(fresh){

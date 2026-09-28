@@ -728,6 +728,8 @@ function closeSheet(){
 overlay.classList.remove('open');
 sheet.classList.remove('open');
 document.body.style.overflow = '';
+// iframe tetep hidup pas kertas ditutup -- kasih tau isinya (mis. video di baby-chef.html) biar pause
+try{ frame.contentWindow.postMessage('shakies-sheet-closed', '*'); }catch(e){}
 }
 
 document.querySelectorAll('[data-sheet-src]').forEach((trigger) => {

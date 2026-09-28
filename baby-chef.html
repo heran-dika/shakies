@@ -28,10 +28,6 @@
     display:flex; flex-direction:column;
   }
 
-  .k-head{ padding: calc(env(safe-area-inset-top,0px) + 20px) 20px 14px; text-align:center; flex:0 0 auto; border-bottom:1px solid var(--border); }
-  .k-head .km-brand{ font-family:'Fraunces',serif; font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-0.01em; }
-  .k-head .sub{ font-size:17px; color:var(--subtitle); font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-top:4px; }
-
   .stage{ flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:16px 22px 30px; }
   .deck{ position:relative; height:100%; max-height:520px; aspect-ratio:9/16; max-width:100%; }
 
@@ -91,11 +87,6 @@
 </style>
 </head>
 <body>
-  <div class="k-head">
-    <div class="km-brand">👶🍳 Shakies</div>
-    <div class="sub">Tanya Baby Chef</div>
-  </div>
-
   <div class="stage"><div class="deck" id="deck"></div></div>
 
   <div class="controls" id="ctlNormal">
@@ -116,7 +107,7 @@ const FAQS = [
 const ACCENTS = ['jade', 'chili', 'gold'];
 const THRESHOLD = 90;   // px geser minimal biar dianggap swipe
 const TAP_SLOP = 6;     // gerak di bawah ini dianggap tap, bukan drag
-const FLY_MS = 380;
+const OUT_MS = 200;    // durasi fase 1: card geser keluar ke kiri sebelum nyelip ke belakang
 
 function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str==null?'':String(str); return d.innerHTML; }
 
@@ -165,7 +156,8 @@ function resetBadges(el){
   el.querySelectorAll('.badge').forEach(b => { b.style.opacity = 0; });
 }
 
-// Card depan terbang ke kiri, terus masuk ke urutan paling belakang.
+// Card depan geser ke kiri (tetap keliatan), terus nyelip ke urutan paling belakang.
+// Sengaja nggak pernah di-opacity 0 / disembunyiin: card selalu keliatan bergerak, jadi nggak ada jeda kosong.
 function skipFront(){
   if(busy || playing) return;
   if(order.length < 2){ layout(); return; }
@@ -173,17 +165,15 @@ function skipFront(){
   const idx = order.shift();
   const el = cards[idx];
   el.style.zIndex = 99;
-  layout(); // card di belakangnya langsung maju ke depan bareng animasi terbang
-  el.style.transform = 'translate3d(-520px,0,0) rotate(-22deg)';
-  el.style.opacity = '0';
+  layout(); // card di belakangnya langsung maju ke depan
+  el.style.transition = `transform ${OUT_MS}ms ease-out`;
+  el.style.transform = `translate3d(-${Math.round(deck.offsetWidth * 0.85)}px,0,0) rotate(-14deg)`;
   setTimeout(() => {
-    el.style.transition = 'none';
+    el.style.transition = ''; // balik ke transisi default
     order.push(idx);
-    layout();
-    void el.offsetWidth;
-    el.style.transition = '';
+    layout();                 // zIndex jadi paling bawah + meluncur ke posisi belakang tumpukan
     busy = false;
-  }, FLY_MS);
+  }, OUT_MS);
 }
 
 // Card depan "maju" (balik ke tengah + sedikit membesar), terus iframe YouTube dipasang & autoplay.
@@ -195,7 +185,7 @@ function playFront(){
   el.classList.add('playing');
   el.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1.03)';
   cards.forEach(c => { if(c !== el) c.style.opacity = '0'; });
-  el.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${FAQS[idx].videoId}?autoplay=1&playsinline=1&rel=0" title="Video Shakies" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  el.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${FAQS[idx].videoId}?autoplay=1&playsinline=1&rel=0&enablejsapi=1" title="Video Shakies" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
   ctlNormal.hidden = true;
   ctlPlaying.hidden = false;
 }
@@ -257,6 +247,14 @@ deck.addEventListener('pointercancel', (e) => endDrag(e, true));
 document.getElementById('btnSkip').addEventListener('click', skipFront);
 document.getElementById('btnPlay').addEventListener('click', playFront);
 document.getElementById('btnBack').addEventListener('click', closeVideo);
+
+// index.html ngirim pesan ini tiap kertas ditutup. Kertas cuma di-geser keluar layar (iframe-nya
+// tetep hidup), jadi tanpa ini video jalan terus di belakang.
+window.addEventListener('message', (e) => {
+  if(e.source !== window.parent || e.data !== 'shakies-sheet-closed') return;
+  const yt = document.querySelector('.card.playing iframe');
+  if(yt) yt.contentWindow.postMessage(JSON.stringify({ event:'command', func:'pauseVideo', args:'' }), '*');
+});
 
 layout();
 

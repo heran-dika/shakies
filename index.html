@@ -531,6 +531,14 @@ animation: sprinkleFly .55s ease-out forwards;
 </span>
 </a>
 
+<a class="link-btn" id="babyChefBtn" data-umami-event="click_baby_chef_faq" data-sheet-src="baby-chef.html" data-sheet-title="Tanya Baby Chef" href="baby-chef.html" target="_blank" rel="noopener">
+<span class="icon-badge"><span class="emoji">👶</span></span>
+<span class="link-text">
+<span class="title">Tanya Baby Chef</span>
+<span class="desc">Kenapa produk Shakies begini, begitu — kepoin di sini</span>
+</span>
+</a>
+
 <a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="?open=reheat" target="_blank" rel="noopener">
 <span class="icon-badge"><span class="emoji">😊</span></span>
 <span class="link-text">
@@ -777,7 +785,8 @@ zone.addEventListener('touchcancel', dragEnd);
 // bakal redirect balik kesini bawa ?open=menu — begitu nyampe, buka kertasnya
 // otomatis biar animasi slide-up-nya tetep keliatan ----
 const SHEET_MAP = {
-menu: { src: 'menu.html', title: "Today's Menu" }
+menu: { src: 'menu.html', title: "Today's Menu" },
+'baby-chef': { src: 'baby-chef.html', title: 'Tanya Baby Chef' }
 };
 if(SHEET_MAP[pendingOpen]){
 const target = SHEET_MAP[pendingOpen];

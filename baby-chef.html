@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Tanya Baby Chef — Shakies</title>
+<script>
+  // Kalau halaman ini diakses LANGSUNG (bukan dari dalam iframe sheet index.html),
+  // redirect balik ke index.html terus otomatis buka kertasnya (pola sama kayak menu.html).
+  if (window.top === window.self) {
+    location.replace('index.html?open=baby-chef');
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FDF0F0; --surface:#FFFFFF; --ink:#1F4172; --ink-soft:#6B756F; --subtitle:#F1B4BB;
+    --jade:#2F5D50; --jade-dark:#1E3D35;
+    --chili:#C1443C; --gold:#B9852D;
+    --border:#E7E1D6;
+  }
+  *{box-sizing:border-box;}
+  [hidden]{ display:none !important; }
+  html,body{ margin:0; padding:0; height:100%; overflow:hidden; overscroll-behavior:none; }
+  body{
+    background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--ink);
+    display:flex; flex-direction:column;
+  }
+
+  .k-head{ padding: calc(env(safe-area-inset-top,0px) + 20px) 20px 14px; text-align:center; flex:0 0 auto; border-bottom:1px solid var(--border); }
+  .k-head .km-brand{ font-family:'Fraunces',serif; font-weight:700; font-size:23px; color:var(--ink); letter-spacing:-0.01em; }
+  .k-head .sub{ font-size:17px; color:var(--subtitle); font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-top:4px; }
+
+  .stage{ flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:16px 22px 30px; }
+  .deck{ position:relative; height:100%; max-height:520px; aspect-ratio:9/16; max-width:100%; }
+
+  .card{
+    position:absolute; inset:0; border-radius:20px; overflow:hidden; background:#000;
+    box-shadow:0 10px 26px rgba(31,65,114,.22);
+    touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .38s cubic-bezier(.22,1,.36,1), opacity .3s ease;
+    will-change:transform;
+  }
+  .card.dragging{ transition:none; cursor:grabbing; }
+  .card.playing{ cursor:default; touch-action:auto; box-shadow:0 14px 34px rgba(31,65,114,.35); }
+  .card img{ width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; -webkit-user-drag:none; }
+  .card iframe{ width:100%; height:100%; border:none; display:block; }
+
+  .card-info{
+    position:absolute; left:0; right:0; bottom:0; padding:48px 16px 16px; pointer-events:none; color:#fff;
+    background:linear-gradient(to top, rgba(0,0,0,.8), rgba(0,0,0,0));
+  }
+  .faq-tag{
+    display:inline-block; color:#fff; font-size:11px; font-weight:700; letter-spacing:.04em;
+    text-transform:uppercase; padding:3px 10px; border-radius:8px; margin-bottom:8px;
+  }
+  .accent-jade .faq-tag{ background:var(--jade); }
+  .accent-chili .faq-tag{ background:var(--chili); }
+  .accent-gold .faq-tag{ background:var(--gold); }
+  .faq-question{ font-family:'Fraunces',serif; font-weight:600; font-size:18px; line-height:1.25; margin:0; }
+
+  .badge{
+    position:absolute; top:18px; padding:6px 12px; border-radius:10px; border:2px solid #fff;
+    font-weight:700; font-size:15px; letter-spacing:.05em; color:#fff; opacity:0; pointer-events:none;
+  }
+  .badge-play{ left:16px; background:var(--jade); transform:rotate(-8deg); }
+  .badge-skip{ right:16px; background:var(--chili); transform:rotate(8deg); }
+
+  .controls{
+    flex:0 0 auto; min-height:84px; display:flex; align-items:center; justify-content:center; gap:16px;
+    padding:6px 22px calc(env(safe-area-inset-bottom,0px) + 16px);
+  }
+  .ctl{
+    width:52px; height:52px; border-radius:50%; border:2px solid; background:var(--surface);
+    font-size:20px; font-weight:700; cursor:pointer; padding:0;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 10px rgba(31,65,114,.15); -webkit-tap-highlight-color:transparent;
+  }
+  .ctl:active{ transform:scale(.92); }
+  .ctl-skip{ color:var(--chili); border-color:var(--chili); }
+  .ctl-play{ color:var(--jade); border-color:var(--jade); }
+  .hint{ margin:0; max-width:150px; font-size:12px; line-height:1.35; color:var(--ink-soft); text-align:center; }
+  .back-btn{
+    background:var(--jade); color:#fff; border:none; border-radius:14px; padding:13px 22px;
+    font-weight:700; font-size:14px; font-family:inherit; cursor:pointer;
+    box-shadow:0 3px 0 var(--jade-dark); -webkit-tap-highlight-color:transparent;
+  }
+  .back-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--jade-dark); }
+</style>
+</head>
+<body>
+  <div class="k-head">
+    <div class="km-brand">👶🍳 Shakies</div>
+    <div class="sub">Tanya Baby Chef</div>
+  </div>
+
+  <div class="stage"><div class="deck" id="deck"></div></div>
+
+  <div class="controls" id="ctlNormal">
+    <button type="button" class="ctl ctl-skip" id="btnSkip" aria-label="Lewati">✕</button>
+    <p class="hint">Geser kiri = lewati<br>Geser kanan / tap = putar</p>
+    <button type="button" class="ctl ctl-play" id="btnPlay" aria-label="Putar video">▶</button>
+  </div>
+  <div class="controls" id="ctlPlaying" hidden>
+    <button type="button" class="back-btn" id="btnBack">Selesai · video berikutnya</button>
+  </div>
+
+<script>
+// Data FAQ produk knowledge. Nambah video baru: tinggal push object baru ke array ini.
+const FAQS = [
+  { pertanyaan: "Kenapa Roti Shakies Terasa Lebih Ringan?", videoId: "8VFUFveX61I" },
+  { pertanyaan: "Pumpkin Donut Shakies: Kenapa Bisa Selembut Ini?", videoId: "radVnFHpo70" }
+];
+const ACCENTS = ['jade', 'chili', 'gold'];
+const THRESHOLD = 90;   // px geser minimal biar dianggap swipe
+const TAP_SLOP = 6;     // gerak di bawah ini dianggap tap, bukan drag
+const FLY_MS = 380;
+
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str==null?'':String(str); return d.innerHTML; }
+
+const deck = document.getElementById('deck');
+const ctlNormal = document.getElementById('ctlNormal');
+const ctlPlaying = document.getElementById('ctlPlaying');
+
+function cardHTML(i){
+  const faq = FAQS[i];
+  return `<img src="https://img.youtube.com/vi/${faq.videoId}/hqdefault.jpg" alt="" draggable="false">
+    <div class="card-info"><span class="faq-tag">FAQ ${i + 1}</span><p class="faq-question">${escapeHtml(faq.pertanyaan)}</p></div>
+    <span class="badge badge-play">PUTAR ▶</span><span class="badge badge-skip">LEWATI</span>`;
+}
+
+const cards = FAQS.map((_, i) => {
+  const el = document.createElement('div');
+  el.className = 'card accent-' + ACCENTS[i % ACCENTS.length];
+  el.innerHTML = cardHTML(i);
+  deck.appendChild(el);
+  return el;
+});
+
+// order[0] = card paling depan. Swipe kiri = shift ke belakang (push ke akhir array).
+let order = FAQS.map((_, i) => i);
+let playing = false, busy = false;
+
+function front(){ return cards[order[0]]; }
+
+// Tumpukan: card depan di tengah, 2 card di belakangnya ngintip ke bawah, sisanya disembunyiin.
+function layout(){
+  order.forEach((idx, rank) => {
+    const el = cards[idx];
+    el.style.zIndex = order.length - rank;
+    if(rank === 0){
+      el.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1)';
+      el.style.opacity = '1';
+    } else {
+      const r = Math.min(rank, 2);
+      el.style.transform = `translate3d(0,${r * 22}px,0) scale(${1 - r * 0.05})`;
+      el.style.opacity = rank < 3 ? '1' : '0';
+    }
+  });
+}
+
+function resetBadges(el){
+  el.querySelectorAll('.badge').forEach(b => { b.style.opacity = 0; });
+}
+
+// Card depan terbang ke kiri, terus masuk ke urutan paling belakang.
+function skipFront(){
+  if(busy || playing) return;
+  if(order.length < 2){ layout(); return; }
+  busy = true;
+  const idx = order.shift();
+  const el = cards[idx];
+  el.style.zIndex = 99;
+  layout(); // card di belakangnya langsung maju ke depan bareng animasi terbang
+  el.style.transform = 'translate3d(-520px,0,0) rotate(-22deg)';
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.style.transition = 'none';
+    order.push(idx);
+    layout();
+    void el.offsetWidth;
+    el.style.transition = '';
+    busy = false;
+  }, FLY_MS);
+}
+
+// Card depan "maju" (balik ke tengah + sedikit membesar), terus iframe YouTube dipasang & autoplay.
+function playFront(){
+  if(busy || playing) return;
+  playing = true;
+  const idx = order[0];
+  const el = cards[idx];
+  el.classList.add('playing');
+  el.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1.03)';
+  cards.forEach(c => { if(c !== el) c.style.opacity = '0'; });
+  el.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${FAQS[idx].videoId}?autoplay=1&playsinline=1&rel=0" title="Video Shakies" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  ctlNormal.hidden = true;
+  ctlPlaying.hidden = false;
+}
+
+// Tutup video (iframe dibuang = video berhenti), card dikembalikan, terus lanjut ke video berikutnya.
+function closeVideo(){
+  if(!playing) return;
+  const idx = order[0];
+  const el = cards[idx];
+  playing = false;
+  el.classList.remove('playing');
+  el.innerHTML = cardHTML(idx);
+  ctlPlaying.hidden = true;
+  ctlNormal.hidden = false;
+  layout();
+  skipFront();
+}
+
+// ---- Drag (Pointer Events: jalan buat touch & mouse) ----
+let sx = 0, sy = 0, dx = 0, dragging = false, pid = null;
+
+deck.addEventListener('pointerdown', (e) => {
+  if(playing || busy) return;
+  const el = front();
+  if(!el.contains(e.target)) return;
+  dragging = true; sx = e.clientX; sy = e.clientY; dx = 0; pid = e.pointerId;
+  el.classList.add('dragging');
+  el.setPointerCapture(pid);
+});
+
+deck.addEventListener('pointermove', (e) => {
+  if(!dragging || e.pointerId !== pid) return;
+  dx = e.clientX - sx;
+  const dy = (e.clientY - sy) * 0.3;
+  const el = front();
+  el.style.transform = `translate3d(${dx}px,${dy}px,0) rotate(${dx * 0.06}deg)`;
+  const p = Math.min(1, Math.abs(dx) / THRESHOLD);
+  el.querySelector('.badge-play').style.opacity = dx > 0 ? p : 0;
+  el.querySelector('.badge-skip').style.opacity = dx < 0 ? p : 0;
+});
+
+function endDrag(e, cancelled){
+  if(!dragging || e.pointerId !== pid) return;
+  dragging = false;
+  const el = front();
+  el.classList.remove('dragging');
+  resetBadges(el);
+  const moved = Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy);
+  if(cancelled) layout();
+  else if(dx > THRESHOLD) playFront();
+  else if(dx < -THRESHOLD) skipFront();
+  else if(moved < TAP_SLOP) playFront(); // tap tanpa geser = putar
+  else layout(); // geser kurang jauh: membal balik
+  dx = 0;
+}
+deck.addEventListener('pointerup', (e) => endDrag(e, false));
+deck.addEventListener('pointercancel', (e) => endDrag(e, true));
+
+document.getElementById('btnSkip').addEventListener('click', skipFront);
+document.getElementById('btnPlay').addEventListener('click', playFront);
+document.getElementById('btnBack').addEventListener('click', closeVideo);
+
+layout();
+
+// Geser ke bawah dari area kosong (bukan dari card) -> nutup kertas, pola sama kayak menu.html.
+// Sentuhan yang mulai di card sengaja diabaikan biar nggak bentrok sama swipe card.
+(function(){
+  let startY = null, tracking = false;
+  const CLOSE_THRESHOLD = 70;
+  window.addEventListener('touchstart', e=>{
+    tracking = !e.target.closest('.card');
+    startY = tracking ? e.touches[0].clientY : null;
+  }, { passive: true });
+  window.addEventListener('touchmove', e=>{
+    if(!tracking) return;
+    if(e.touches[0].clientY - startY > 0) e.preventDefault();
+  }, { passive: false });
+  window.addEventListener('touchend', e=>{
+    if(!tracking) return;
+    tracking = false;
+    const dy = e.changedTouches[0].clientY - startY;
+    if(dy > CLOSE_THRESHOLD){
+      if (window.top !== window.self) {
+        window.parent.postMessage('shakies-menu-close', '*');
+      } else {
+        history.back();
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

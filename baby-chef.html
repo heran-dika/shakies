@@ -28,7 +28,7 @@
     display:flex; flex-direction:column;
   }
 
-  .stage{ flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:16px 22px 88px; }
+  .stage{ flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:16px 22px 120px; }
   .deck{ position:relative; height:100%; max-height:520px; aspect-ratio:9/16; max-width:100%; }
 
   .card{
@@ -75,8 +75,8 @@
     position:absolute; top:18px; padding:6px 12px; border-radius:10px; border:2px solid #fff;
     font-weight:700; font-size:15px; letter-spacing:.05em; color:#fff; opacity:0; pointer-events:none;
   }
-  .badge-play{ left:16px; background:var(--jade); transform:rotate(-8deg); }
-  .badge-skip{ right:16px; background:var(--chili); transform:rotate(8deg); }
+  .badge-next{ left:16px; background:var(--chili); transform:rotate(-8deg); }
+  .badge-prev{ right:16px; background:var(--jade); transform:rotate(8deg); }
 
   .controls{
     flex:0 0 auto; min-height:84px; display:flex; align-items:center; justify-content:center; gap:16px;
@@ -105,7 +105,7 @@
 
   <div class="controls" id="ctlNormal">
     <button type="button" class="ctl ctl-skip" id="btnSkip" aria-label="Lewati">✕</button>
-    <p class="hint">Geser kiri = lewati<br>Geser kanan / tap = putar</p>
+    <p class="hint">Geser kiri = lewati<br>Geser kanan = balik<br>Tap / ▶ = putar</p>
     <button type="button" class="ctl ctl-play" id="btnPlay" aria-label="Putar video">▶</button>
   </div>
   <div class="controls" id="ctlPlaying" hidden>
@@ -117,12 +117,14 @@
 const FAQS = [
   { pertanyaan: "Roti Shakies Gak Habis? Ini Cara Simpan Biar Tetap Empuk (Suhu Ruang, Kulkas, Freezer)", videoId: "KqMzNIZcQP8" },
   { pertanyaan: "Kenapa Roti Shakies Terasa Lebih Ringan?", videoId: "8VFUFveX61I" },
-  { pertanyaan: "Pumpkin Donut Shakies: Kenapa Bisa Selembut Ini?", videoId: "radVnFHpo70" }
+  { pertanyaan: "Pumpkin Donut Shakies: Kenapa Bisa Selembut Ini?", videoId: "radVnFHpo70" },
+  { pertanyaan: "Cara Menghangatkan Roti Shakies: Air Fryer atau Oven, Jangan Microwave!", videoId: "JDLOL3VlIqA" }
 ];
 const ACCENTS = ['jade', 'chili', 'gold'];
 const THRESHOLD = 90;   // px geser minimal biar dianggap swipe
 const TAP_SLOP = 6;     // gerak di bawah ini dianggap tap, bukan drag
-const OUT_MS = 200;    // durasi fase 1: card geser keluar ke kiri sebelum nyelip ke belakang
+const OUT_MS = 200;    // durasi fase 1 nextCard: card geser keluar sebelum nyelip ke belakang
+const ROTATE_MS = 380; // durasi transisi default .card -- dipake prevCard nunggu animasi kelar
 
 function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str==null?'':String(str); return d.innerHTML; }
 
@@ -135,7 +137,7 @@ function cardHTML(i){
   return `<img src="https://img.youtube.com/vi/${faq.videoId}/hqdefault.jpg" alt="" draggable="false">
     <div class="card-info"><span class="faq-tag">FAQ ${i + 1}</span><p class="faq-question">${escapeHtml(faq.pertanyaan)}</p></div>
     <div class="info-peek"><span>${escapeHtml(faq.pertanyaan)}</span></div>
-    <span class="badge badge-play">PUTAR ▶</span><span class="badge badge-skip">LEWATI</span>`;
+    <span class="badge badge-next">LEWATI ▷</span><span class="badge badge-prev">◁ BALIK</span>`;
 }
 
 const cards = FAQS.map((_, i) => {
@@ -146,16 +148,33 @@ const cards = FAQS.map((_, i) => {
   return el;
 });
 
-// order[0] = card paling depan. Swipe kiri = shift ke belakang (push ke akhir array).
+// order[0] = card paling depan. Swipe kanan = shift ke belakang (push ke akhir array).
 let order = FAQS.map((_, i) => i);
 let playing = false, busy = false;
 
+// Kalau dibuka lewat link share (?faq=VIDEO_ID), majuin video itu ke depan tumpukan dulu.
+(function(){
+  const wantId = new URLSearchParams(location.search).get('faq');
+  if(!wantId) return;
+  const pos = order.findIndex(idx => FAQS[idx].videoId === wantId);
+  if(pos > 0) order.unshift(...order.splice(pos, 1));
+})();
+
+// Kasih tau parent (index.html) video mana yang lagi di depan -- dipakai tombol share
+// di header kertas biar tau link mana yang mesti di-copy.
+function notifyFront(){
+  window.parent.postMessage({ type: 'shakies-baby-chef-front', videoId: FAQS[order[0]].videoId }, '*');
+}
+
 function front(){ return cards[order[0]]; }
 
-// Tumpukan: card depan di tengah; card di belakangnya nongol PEEK[r] px di bawahnya
-// (rank 1 = judulnya kebaca di strip, rank 2 = sliver polos), sisanya disembunyiin.
-const SCALES = [1, 0.94, 0.88];
-const PEEK   = [0, 56, 74];
+// Tumpukan: card depan di tengah. SEMUA card lain di belakangnya harus keintip dikit
+// (nggak boleh ada yang keumpet), karena swipe kanan narik langsung card paling belakang.
+// Rank 1 = judulnya kebaca di strip; rank 2+ = sliver polos, makin dalam makin rapat & kecil
+// (nambah jarak dibatasi PEEK_STEP_MAX_RANK biar nggak numpuk sampe luar layar kalau videonya banyak).
+const PEEK_STEP_MAX_RANK = 4;
+function peekFor(rank){ return 56 + (Math.min(rank, PEEK_STEP_MAX_RANK) - 1) * 16; }
+function scaleFor(rank){ return Math.max(0.72, 1 - Math.min(rank, PEEK_STEP_MAX_RANK) * 0.055); }
 function layout(){
   const H = deck.offsetHeight;
   order.forEach((idx, rank) => {
@@ -165,14 +184,13 @@ function layout(){
     el.classList.toggle('is-deep', rank >= 2);
     if(rank === 0){
       el.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1)';
-      el.style.opacity = '1';
     } else {
-      const r = Math.min(rank, 2);
+      const scale = scaleFor(rank);
       // scale mengecilkan card ke arah tengah, jadi tepi bawahnya naik (1-s)*H/2 -- dikompensasi di translate
-      const ty = PEEK[r] + (1 - SCALES[r]) * H / 2;
-      el.style.transform = `translate3d(0,${ty}px,0) scale(${SCALES[r]})`;
-      el.style.opacity = rank < 3 ? '1' : '0';
+      const ty = peekFor(rank) + (1 - scale) * H / 2;
+      el.style.transform = `translate3d(0,${ty}px,0) scale(${scale})`;
     }
+    el.style.opacity = '1';
   });
 }
 window.addEventListener('resize', () => { if(!playing && !busy) layout(); });
@@ -181,9 +199,9 @@ function resetBadges(el){
   el.querySelectorAll('.badge').forEach(b => { b.style.opacity = 0; });
 }
 
-// Card depan geser ke kiri (tetap keliatan), terus nyelip ke urutan paling belakang.
+// Maju: card depan geser ke kiri (tetap keliatan), nyelip ke urutan paling belakang, rank-1 jadi depan.
 // Sengaja nggak pernah di-opacity 0 / disembunyiin: card selalu keliatan bergerak, jadi nggak ada jeda kosong.
-function skipFront(){
+function nextCard(){
   if(busy || playing) return;
   if(order.length < 2){ layout(); return; }
   busy = true;
@@ -198,7 +216,30 @@ function skipFront(){
     order.push(idx);
     layout();                 // zIndex jadi paling bawah + meluncur ke posisi belakang tumpukan
     busy = false;
+    notifyFront();
   }, OUT_MS);
+}
+
+// Mundur (kebalikan nextCard): card PALING BELAKANG ditarik maju jadi depan, front lama
+// mundur jadi rank-1. Card yang ditarik masuk dari luar layar kanan, layout() yang animasiin
+// front lama geser ke posisi rank-1 (lewat transition default .card, bukan transisi custom).
+function prevCard(){
+  if(busy || playing) return;
+  if(order.length < 2){ layout(); return; }
+  busy = true;
+  const idx = order.pop();
+  const el = cards[idx];
+  el.style.zIndex = 99;
+  el.style.transition = 'none';
+  el.style.transform = `translate3d(${Math.round(deck.offsetWidth * 0.85)}px,0,0) rotate(14deg)`;
+  void el.offsetWidth; // force reflow biar transition:none kepake dulu sebelum diaktifin lagi
+  el.style.transition = '';
+  order.unshift(idx);
+  layout();
+  setTimeout(() => {
+    busy = false;
+    notifyFront();
+  }, ROTATE_MS);
 }
 
 // Card depan "maju" (balik ke tengah + sedikit membesar), terus iframe YouTube dipasang & autoplay.
@@ -226,7 +267,7 @@ function closeVideo(){
   ctlPlaying.hidden = true;
   ctlNormal.hidden = false;
   layout();
-  skipFront();
+  nextCard();
 }
 
 // ---- Drag (Pointer Events: jalan buat touch & mouse) ----
@@ -248,8 +289,8 @@ deck.addEventListener('pointermove', (e) => {
   const el = front();
   el.style.transform = `translate3d(${dx}px,${dy}px,0) rotate(${dx * 0.06}deg)`;
   const p = Math.min(1, Math.abs(dx) / THRESHOLD);
-  el.querySelector('.badge-play').style.opacity = dx > 0 ? p : 0;
-  el.querySelector('.badge-skip').style.opacity = dx < 0 ? p : 0;
+  el.querySelector('.badge-next').style.opacity = dx < 0 ? p : 0;
+  el.querySelector('.badge-prev').style.opacity = dx > 0 ? p : 0;
 });
 
 function endDrag(e, cancelled){
@@ -260,8 +301,8 @@ function endDrag(e, cancelled){
   resetBadges(el);
   const moved = Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy);
   if(cancelled) layout();
-  else if(dx > THRESHOLD) playFront();
-  else if(dx < -THRESHOLD) skipFront();
+  else if(dx < -THRESHOLD) nextCard();
+  else if(dx > THRESHOLD) prevCard();
   else if(moved < TAP_SLOP) playFront(); // tap tanpa geser = putar
   else layout(); // geser kurang jauh: membal balik
   dx = 0;
@@ -269,7 +310,7 @@ function endDrag(e, cancelled){
 deck.addEventListener('pointerup', (e) => endDrag(e, false));
 deck.addEventListener('pointercancel', (e) => endDrag(e, true));
 
-document.getElementById('btnSkip').addEventListener('click', skipFront);
+document.getElementById('btnSkip').addEventListener('click', nextCard);
 document.getElementById('btnPlay').addEventListener('click', playFront);
 document.getElementById('btnBack').addEventListener('click', closeVideo);
 
@@ -282,6 +323,7 @@ window.addEventListener('message', (e) => {
 });
 
 layout();
+notifyFront();
 
 // Geser ke bawah dari area kosong (bukan dari card) -> nutup kertas, pola sama kayak menu.html.
 // Sentuhan yang mulai di card sengaja diabaikan biar nggak bentrok sama swipe card.

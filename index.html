@@ -294,6 +294,7 @@ justify-content:space-between;
 padding:10px 16px 12px;
 flex:0 0 auto;
 touch-action:none;
+gap:8px;
 }
 .sheet-header-text .sheet-title{
 font-weight:700;
@@ -313,6 +314,12 @@ box-shadow:0 2px 0 var(--pill-shadow);
 flex:0 0 auto;
 }
 .sheet-close:active{ transform:translateY(1px); box-shadow:none; }
+.sheet-header-actions{
+display:flex;
+align-items:center;
+gap:8px;
+flex:0 0 auto;
+}
 .menu-sheet iframe{
 flex:1 1 auto;
 width:100%;
@@ -320,7 +327,7 @@ border:none;
 background:var(--white);
 }
 
-/* ===== LIGHTBOX (popup gambar Reheat Instruction) ===== */
+/* ===== LIGHTBOX (popup, dipake bareng sama Pick up Location) ===== */
 .lightbox-overlay{
 position:fixed;
 inset:0;
@@ -337,18 +344,6 @@ z-index:60;
 .lightbox-overlay.open{
 opacity:1;
 visibility:visible;
-}
-.lightbox-inner{
-position:relative;
-max-width:100%;
-max-height:100%;
-}
-.lightbox-inner img{
-display:block;
-max-width:100%;
-max-height:80vh;
-border-radius:16px;
-box-shadow:0 8px 30px rgba(0,0,0,0.4);
 }
 .lightbox-close{
 position:absolute;
@@ -532,18 +527,10 @@ animation: sprinkleFly .55s ease-out forwards;
 </a>
 
 <a class="link-btn" id="babyChefBtn" data-umami-event="click_baby_chef_faq" data-sheet-src="baby-chef.html" data-sheet-title="Tanya Baby Chef" href="baby-chef.html" target="_blank" rel="noopener">
-<span class="icon-badge"><span class="emoji">👶</span></span>
+<span class="icon-badge"><span class="emoji">😊</span></span>
 <span class="link-text">
 <span class="title">Tanya Baby Chef</span>
 <span class="desc">Kenapa produk Shakies begini, begitu — kepoin di sini</span>
-</span>
-</a>
-
-<a class="link-btn" id="reheatBtn" data-umami-event="click_reheat_instruction" href="?open=reheat" target="_blank" rel="noopener">
-<span class="icon-badge"><span class="emoji">😊</span></span>
-<span class="link-text">
-<span class="title">Reheat Instruction</span>
-<span class="desc">Warm is more delicious</span>
 </span>
 </a>
 
@@ -598,16 +585,12 @@ animation: sprinkleFly .55s ease-out forwards;
 <div class="sheet-header-text">
 <span class="sheet-title" id="sheetTitleText">Today's Menu</span>
 </div>
+<div class="sheet-header-actions">
+<button class="sheet-close" id="babyChefShareBtn" aria-label="Bagikan video ini" hidden>⤴</button>
 <button class="sheet-close" id="menuSheetClose" aria-label="Tutup">✕</button>
 </div>
+</div>
 <iframe id="menuSheetFrame" title="Today's Menu"></iframe>
-</div>
-
-<div class="lightbox-overlay" id="reheatOverlay">
-<div class="lightbox-inner">
-<button class="lightbox-close" id="reheatClose" aria-label="Tutup">✕</button>
-<img src="assets/reheat-instruction.png" alt="Reheat Instruction">
-</div>
 </div>
 
 <div class="lightbox-overlay" id="pickupOverlay">
@@ -672,18 +655,21 @@ toggleIcon.classList.add('icon-spin');
 setTimeout(() => { toggleIcon.textContent = isNight ? '☀️' : '🌙'; }, 200);
 });
 
-// ===== Param ?open=... (dibaca sekali di sini, dipakai bareng sheet & lightbox di bawah) =====
-// Cuma key 'open' yang dibuang dari URL — parameter lain (mis. UTM) tetap dipertahankan,
+// ===== Param ?open=... & ?faq=... (dibaca sekali di sini, dipakai bareng sheet & lightbox di bawah) =====
+// Cuma key 'open'/'faq' yang dibuang dari URL — parameter lain (mis. UTM) tetap dipertahankan,
 // biar nggak kepotong sebelum sempat kebaca script Umami (defer, jalan setelah blok ini).
-const pendingOpen = (function(){
+// 'faq' dipake khusus link share dari Tanya Baby Chef, biar video tertentu langsung maju ke depan.
+const { pendingOpen, pendingFaq } = (function(){
 const urlParams = new URLSearchParams(location.search);
-const val = urlParams.get('open');
-if(val){
-urlParams.delete('open');
+const open = urlParams.get('open');
+const faq = urlParams.get('faq');
+if(open) urlParams.delete('open');
+if(faq) urlParams.delete('faq');
+if(open || faq){
 const rest = urlParams.toString();
 history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
 }
-return val;
+return { pendingOpen: open, pendingFaq: faq };
 })();
 
 // ===== Bersihin param UTM dari address bar setelah Umami sempat baca (biar URL keliatan bersih kayak buka index biasa) =====
@@ -707,19 +693,40 @@ history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
 }, 1500);
 });
 
+// Helper reusable buat copy-to-clipboard, dipake sama Pick up Location (Salin Alamat)
+// dan tombol share di Tanya Baby Chef -- 1 fungsi, 2 pemakai, daripada duplikat logic fallback-nya.
+async function copyToClipboard(text){
+if(navigator.clipboard && window.isSecureContext){
+await navigator.clipboard.writeText(text);
+return;
+}
+const ta = document.createElement('textarea');
+ta.value = text;
+ta.style.position = 'fixed';
+ta.style.opacity = '0';
+document.body.appendChild(ta);
+ta.focus();
+ta.select();
+document.execCommand('copy');
+document.body.removeChild(ta);
+}
+
 // ===== Sheet generik (kertas nongol dari bawah, load iframe lokal - sama scope, no PWA capturing) =====
 // Dipakai Today's Menu (menu.html) & Kitchen Lab (embed eksternal)
 (function(){
 const overlay = document.getElementById('menuSheetOverlay');
 const sheet = document.getElementById('menuSheet');
 const closeBtn = document.getElementById('menuSheetClose');
+const shareBtn = document.getElementById('babyChefShareBtn');
 const frame = document.getElementById('menuSheetFrame');
 const titleEl = document.getElementById('sheetTitleText');
 let currentSrc = null;
+let babyChefFrontVideoId = null; // di-update tiap baby-chef.html ngasih tau card mana yang lagi di depan
 
 function openSheet(src, title){
 if(currentSrc !== src){ frame.src = src; currentSrc = src; }
 if(title) titleEl.textContent = title;
+shareBtn.hidden = !src.startsWith('baby-chef.html');
 overlay.classList.add('open');
 sheet.classList.add('open');
 document.body.style.overflow = 'hidden';
@@ -731,6 +738,23 @@ document.body.style.overflow = '';
 // iframe tetep hidup pas kertas ditutup -- kasih tau isinya (mis. video di baby-chef.html) biar pause
 try{ frame.contentWindow.postMessage('shakies-sheet-closed', '*'); }catch(e){}
 }
+
+shareBtn.addEventListener('click', async () => {
+if(!babyChefFrontVideoId) return;
+const url = new URL(location.href);
+url.search = '';
+url.searchParams.set('open', 'baby-chef');
+url.searchParams.set('faq', babyChefFrontVideoId);
+try{
+await copyToClipboard(url.toString());
+const original = shareBtn.textContent;
+shareBtn.textContent = '✓';
+shareBtn.disabled = true;
+setTimeout(() => { shareBtn.textContent = original; shareBtn.disabled = false; }, 1500);
+}catch(e){
+alert('Link: ' + url.toString());
+}
+});
 
 document.querySelectorAll('[data-sheet-src]').forEach((trigger) => {
 trigger.addEventListener('click', (e) => {
@@ -747,6 +771,7 @@ if(e.key === 'Escape') closeSheet();
 });
 window.addEventListener('message', (e) => {
 if(e.data === 'shakies-menu-close') closeSheet();
+if(e.data && e.data.type === 'shakies-baby-chef-front') babyChefFrontVideoId = e.data.videoId;
 });
 
 // ---- Geser ke bawah di handle/header buat nutup KERTASNYA AJA (bukan ikut
@@ -792,42 +817,10 @@ menu: { src: 'menu.html', title: "Today's Menu" },
 };
 if(SHEET_MAP[pendingOpen]){
 const target = SHEET_MAP[pendingOpen];
-window.addEventListener('load', () => setTimeout(() => openSheet(target.src, target.title), 350));
-}
-})();
-
-// ===== Reheat Instruction lightbox (popup gambar, bukan buka tab IG) =====
-(function(){
-const reheatBtn = document.getElementById('reheatBtn');
-const reheatOverlay = document.getElementById('reheatOverlay');
-const reheatClose = document.getElementById('reheatClose');
-
-function openReheat(){
-reheatOverlay.classList.add('open');
-document.body.style.overflow = 'hidden';
-}
-function closeReheat(){
-reheatOverlay.classList.remove('open');
-document.body.style.overflow = '';
-}
-
-reheatBtn.addEventListener('click', (e) => {
-// ctrl/cmd/shift/middle-click: buka landing page + popup (href=?open=reheat) di tab baru
-if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-e.preventDefault();
-openReheat();
-});
-reheatOverlay.addEventListener('click', (e) => {
-if(e.target === reheatOverlay) closeReheat(); // klik bg gelap = nutup
-});
-reheatClose.addEventListener('click', closeReheat);
-document.addEventListener('keydown', (e) => {
-if(e.key === 'Escape') closeReheat();
-});
-
-// Link/QR langsung: index.html?open=reheat
-if(pendingOpen === 'reheat'){
-window.addEventListener('load', () => setTimeout(openReheat, 350));
+// Link share dari Baby Chef bawa ?faq=VIDEO_ID -- diteruskan ke iframe src-nya
+// biar video itu yang dimajuin ke depan tumpukan pas kertas kebuka.
+const src = (pendingOpen === 'baby-chef' && pendingFaq) ? `${target.src}?faq=${encodeURIComponent(pendingFaq)}` : target.src;
+window.addEventListener('load', () => setTimeout(() => openSheet(src, target.title), 350));
 }
 })();
 
@@ -841,20 +834,7 @@ const PICKUP_ADDRESS = 'SHAKIES - Jl. Lotus Raya Blok D2 no.11A';
 
 async function copyAddress(){
 try{
-if(navigator.clipboard && window.isSecureContext){
-await navigator.clipboard.writeText(PICKUP_ADDRESS);
-} else {
-// Fallback buat browser/webview lama yang gak support Clipboard API
-const ta = document.createElement('textarea');
-ta.value = PICKUP_ADDRESS;
-ta.style.position = 'fixed';
-ta.style.opacity = '0';
-document.body.appendChild(ta);
-ta.focus();
-ta.select();
-document.execCommand('copy');
-document.body.removeChild(ta);
-}
+await copyToClipboard(PICKUP_ADDRESS);
 const original = copyAddressBtn.textContent;
 copyAddressBtn.textContent = 'Tersalin! ✓';
 copyAddressBtn.disabled = true;

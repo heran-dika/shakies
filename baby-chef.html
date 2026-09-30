@@ -123,8 +123,9 @@ const FAQS = [
 const ACCENTS = ['jade', 'chili', 'gold'];
 const THRESHOLD = 90;   // px geser minimal biar dianggap swipe
 const TAP_SLOP = 6;     // gerak di bawah ini dianggap tap, bukan drag
-const OUT_MS = 200;    // durasi fase 1 nextCard: card geser keluar sebelum nyelip ke belakang
-const ROTATE_MS = 380; // durasi transisi default .card -- dipake prevCard nunggu animasi kelar
+const OUT_MS = 200;    // durasi transisi lempar-keluar (nextCard) / masuk (prevCard fase 3)
+const SNAP_MS = 140;   // prevCard fase 1: front balik persis ke tengah
+const RECEDE_MS = 220; // prevCard fase 2: front (dkk) mundur ke rank barunya
 
 function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str==null?'':String(str); return d.innerHTML; }
 
@@ -175,19 +176,29 @@ function front(){ return cards[order[0]]; }
 const PEEK_STEP_MAX_RANK = 4;
 function peekFor(rank){ return 56 + (Math.min(rank, PEEK_STEP_MAX_RANK) - 1) * 16; }
 function scaleFor(rank){ return Math.max(0.72, 1 - Math.min(rank, PEEK_STEP_MAX_RANK) * 0.055); }
-function layout(){
+// Posisi istirahat SEMUA card selain depan itu tetap (nggak digeser ke samping) -- efek
+// "masuk dari kanan" pas swipe kanan itu dari animasi lempar transient di prevCard(),
+// bukan dari posisi diemnya (kalau posisi diemnya digeser permanen, card yang abis dilempar
+// ke kiri dan jadi paling belakang bakal keseret aneh dari ujung kiri ke ujung kanan).
+// Posisi istirahat di rank tertentu -- dipake layout() (final) dan prevCard() fase 2 (transisi).
+function restPos(rank){
+  if(rank === 0) return { ty: 0, scale: 1 };
+  const scale = scaleFor(rank);
   const H = deck.offsetHeight;
+  const ty = peekFor(rank) + (1 - scale) * H / 2; // scale ngecilin ke tengah, tepi bawah naik -- dikompensasi
+  return { ty, scale };
+}
+function layout(){
+  const total = order.length;
   order.forEach((idx, rank) => {
     const el = cards[idx];
-    el.style.zIndex = order.length - rank;
+    el.style.zIndex = total - rank;
     el.classList.toggle('is-back', rank === 1);
     el.classList.toggle('is-deep', rank >= 2);
     if(rank === 0){
       el.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1)';
     } else {
-      const scale = scaleFor(rank);
-      // scale mengecilkan card ke arah tengah, jadi tepi bawahnya naik (1-s)*H/2 -- dikompensasi di translate
-      const ty = peekFor(rank) + (1 - scale) * H / 2;
+      const { ty, scale } = restPos(rank);
       el.style.transform = `translate3d(0,${ty}px,0) scale(${scale})`;
     }
     el.style.opacity = '1';
@@ -195,8 +206,8 @@ function layout(){
 }
 window.addEventListener('resize', () => { if(!playing && !busy) layout(); });
 
-function resetBadges(el){
-  el.querySelectorAll('.badge').forEach(b => { b.style.opacity = 0; });
+function resetAllBadges(){
+  cards.forEach(el => el.querySelectorAll('.badge').forEach(b => { b.style.opacity = 0; }));
 }
 
 // Maju: card depan geser ke kiri (tetap keliatan), nyelip ke urutan paling belakang, rank-1 jadi depan.
@@ -220,26 +231,57 @@ function nextCard(){
   }, OUT_MS);
 }
 
-// Mundur (kebalikan nextCard): card PALING BELAKANG ditarik maju jadi depan, front lama
-// mundur jadi rank-1. Card yang ditarik masuk dari luar layar kanan, layout() yang animasiin
-// front lama geser ke posisi rank-1 (lewat transition default .card, bukan transisi custom).
+// Mundur -- 3 fase BERURUTAN (bukan bareng), biar tiap gerakan keliatan jelas satu-satu,
+// nggak "lompat": (1) card yang lagi dipegang balik persis ke tengah dulu, (2) BARU dia
+// (+ card lain di antaranya) mundur ke rank barunya, (3) BARU card paling belakang meluncur
+// masuk dari kanan jadi depan -- mirror animasi lempar-kiri di nextCard, arah dibalik.
 function prevCard(){
   if(busy || playing) return;
   if(order.length < 2){ layout(); return; }
   busy = true;
-  const idx = order.pop();
-  const el = cards[idx];
-  el.style.zIndex = 99;
-  el.style.transition = 'none';
-  el.style.transform = `translate3d(${Math.round(deck.offsetWidth * 0.85)}px,0,0) rotate(14deg)`;
-  void el.offsetWidth; // force reflow biar transition:none kepake dulu sebelum diaktifin lagi
-  el.style.transition = '';
-  order.unshift(idx);
-  layout();
+  const frontEl = front();
+  const deepIdx = order[order.length - 1];
+  const deepEl = cards[deepIdx];
+
+  // Fase 1: card yang dipegang balik persis ke tengah (ngilangin sisa offset/rotasi drag).
+  frontEl.style.transition = `transform ${SNAP_MS}ms ease-out`;
+  frontEl.style.transform = 'translate3d(0,0,0) rotate(0deg)';
+
   setTimeout(() => {
-    busy = false;
-    notifyFront();
-  }, ROTATE_MS);
+    // Fase 2: `order` BELUM diubah di sini -- dihitung manual: tiap card KECUALI yang paling
+    // belakang mundur ke targetRank = rank sekarang + 1. Card paling belakang (deepEl) sama
+    // sekali nggak disentuh, diem di posisi lamanya sampai fase 3.
+    order.slice(0, -1).forEach((idx, rank) => {
+      const el = cards[idx];
+      const targetRank = rank + 1;
+      el.style.transition = `transform ${RECEDE_MS}ms ease-out`;
+      el.classList.toggle('is-back', targetRank === 1);
+      el.classList.toggle('is-deep', targetRank >= 2);
+      const { ty, scale } = restPos(targetRank);
+      el.style.transform = `translate3d(0,${ty}px,0) scale(${scale})`;
+      el.style.zIndex = order.length - targetRank;
+    });
+
+    setTimeout(() => {
+      order.slice(0, -1).forEach(idx => { cards[idx].style.transition = ''; }); // balik ke default
+
+      // Fase 3: BARU sekarang beneran di-reorder, card paling belakang meluncur masuk dari
+      // kanan jadi depan. layout() nge-set semua card ke rank final -- yang laen udah pas
+      // dari fase 2 (no-op buat mereka), cuma deepEl yang keliatan gerak (transisi custom).
+      deepEl.style.transition = 'none';
+      deepEl.style.zIndex = 99;
+      deepEl.style.transform = `translate3d(${Math.round(deck.offsetWidth * 0.85)}px,0,0) rotate(14deg)`;
+      void deepEl.offsetWidth; // force reflow biar posisi luar-layar ke-apply dulu sebelum transisi nyala
+      deepEl.style.transition = `transform ${OUT_MS}ms ease-out`;
+      order.unshift(order.pop());
+      layout();
+      setTimeout(() => {
+        deepEl.style.transition = '';
+        busy = false;
+        notifyFront();
+      }, OUT_MS);
+    }, RECEDE_MS);
+  }, SNAP_MS);
 }
 
 // Card depan "maju" (balik ke tengah + sedikit membesar), terus iframe YouTube dipasang & autoplay.
@@ -282,6 +324,9 @@ deck.addEventListener('pointerdown', (e) => {
   el.setPointerCapture(pid);
 });
 
+// Preview drag: cuma card DEPAN yang gerak, ngikutin jari 1:1 (posisi + rotasi), dua arah
+// sama persis. Card lain diem total di posisi istirahatnya -- animasi "card belakang masuk"
+// baru kejadian di prevCard() pas dilepas (lihat komentar di sana), bukan selama drag.
 deck.addEventListener('pointermove', (e) => {
   if(!dragging || e.pointerId !== pid) return;
   dx = e.clientX - sx;
@@ -298,7 +343,7 @@ function endDrag(e, cancelled){
   dragging = false;
   const el = front();
   el.classList.remove('dragging');
-  resetBadges(el);
+  resetAllBadges();
   const moved = Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy);
   if(cancelled) layout();
   else if(dx < -THRESHOLD) nextCard();

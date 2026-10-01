@@ -157,14 +157,36 @@
     </div>
   </div>
 
-<script>
+<script type="module">
 // Data FAQ produk knowledge. Nambah video baru: tinggal push object baru ke array ini.
-const FAQS = [
+const FALLBACK_FAQS = [
   { pertanyaan: "Roti Shakies Gak Habis? Ini Cara Simpan Biar Tetap Empuk (Suhu Ruang, Kulkas, Freezer)", videoId: "KqMzNIZcQP8" },
   { pertanyaan: "Kenapa Roti Shakies Terasa Lebih Ringan?", videoId: "8VFUFveX61I" },
   { pertanyaan: "Pumpkin Donut Shakies: Kenapa Bisa Selembut Ini?", videoId: "radVnFHpo70" },
   { pertanyaan: "Cara Menghangatkan Roti Shakies: Air Fryer atau Oven, Jangan Microwave!", videoId: "JDLOL3VlIqA" }
 ];
+
+// Daftar video dibaca dari faqs.json (diedit lewat admin-baby-chef.html).
+// Entri rusak dibuang; kalau file gagal dimuat / kosong, pakai FALLBACK_FAQS di atas.
+async function loadFaqs(){
+  try{
+    const res = await fetch('./faqs.json', { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if(!Array.isArray(data)) throw new Error('bukan array');
+    const seen = new Set();
+    const clean = data
+      .filter(f => f && f.aktif !== false
+        && typeof f.videoId === 'string' && /^[\w-]{11}$/.test(f.videoId)
+        && typeof f.pertanyaan === 'string' && f.pertanyaan.trim()
+        && !seen.has(f.videoId) && seen.add(f.videoId))
+      .map(f => ({ pertanyaan: f.pertanyaan.trim(), videoId: f.videoId }));
+    return clean.length ? clean : FALLBACK_FAQS;
+  } catch(e){
+    return FALLBACK_FAQS;
+  }
+}
+const FAQS = await loadFaqs();
 const ACCENTS = ['jade', 'chili', 'gold'];
 const THRESHOLD = 90;   // px geser minimal biar dianggap swipe
 const TAP_SLOP = 6;     // gerak di bawah ini dianggap tap, bukan drag

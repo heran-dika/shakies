@@ -481,30 +481,24 @@ window.addEventListener('message', (e) => {
 layout();
 notifyFront();
 
-// Geser ke bawah dari area kosong (bukan dari card) -> nutup kertas, pola sama kayak menu.html.
-// Sentuhan yang mulai di card sengaja diabaikan biar nggak bentrok sama swipe card.
+// Geser ke bawah dari area kosong NGGAK lagi nutup kertas (sering kepencet nggak sengaja) --
+// nutup kertas cuma lewat handle/header/tombol X di index.html. Gesture di sini cuma aktif
+// pas video lagi diputar: geser ke bawah ATAU ke samping dari area kosong di luar card = balik
+// ke tumpukan (sama kayak tombol "Selesai"). Sentuhan di dalam player YouTube nggak kebaca
+// dari sini (iframe lintas-origin nangkep sentuhannya sendiri), jadi geser dari luar video.
 (function(){
-  let startY = null, tracking = false;
-  const CLOSE_THRESHOLD = 70;
+  let sx = 0, sy = 0, tracking = false;
+  const BACK_THRESHOLD = 70;
   window.addEventListener('touchstart', e=>{
-    tracking = !e.target.closest('.card');
-    startY = tracking ? e.touches[0].clientY : null;
+    tracking = playing && !e.target.closest('.card');
+    if(tracking){ sx = e.touches[0].clientX; sy = e.touches[0].clientY; }
   }, { passive: true });
-  window.addEventListener('touchmove', e=>{
-    if(!tracking) return;
-    if(e.touches[0].clientY - startY > 0) e.preventDefault();
-  }, { passive: false });
   window.addEventListener('touchend', e=>{
     if(!tracking) return;
     tracking = false;
-    const dy = e.changedTouches[0].clientY - startY;
-    if(dy > CLOSE_THRESHOLD){
-      if (window.top !== window.self) {
-        window.parent.postMessage('shakies-menu-close', '*');
-      } else {
-        history.back();
-      }
-    }
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if(dy > BACK_THRESHOLD || Math.abs(dx) > BACK_THRESHOLD) closeVideo();
   });
 })();
 </script>

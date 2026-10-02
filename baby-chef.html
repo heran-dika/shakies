@@ -288,7 +288,7 @@ function nextCard(){
   el.style.zIndex = 99;
   layout(); // card di belakangnya langsung maju ke depan
   el.style.transition = `transform ${OUT_MS}ms ease-out`;
-  el.style.transform = `translate3d(-${Math.round(deck.offsetWidth * 0.85)}px,0,0) rotate(-14deg)`;
+  el.style.transform = `translate3d(${Math.round(deck.offsetWidth * 0.85)}px,0,0) rotate(14deg)`;
   setTimeout(() => {
     el.style.transition = ''; // balik ke transisi default
     order.push(idx);
@@ -337,7 +337,7 @@ function prevCard(){
       // dari fase 2 (no-op buat mereka), cuma deepEl yang keliatan gerak (transisi custom).
       deepEl.style.transition = 'none';
       deepEl.style.zIndex = 99;
-      deepEl.style.transform = `translate3d(${Math.round(deck.offsetWidth * 0.85)}px,0,0) rotate(14deg)`;
+      deepEl.style.transform = `translate3d(-${Math.round(deck.offsetWidth * 0.85)}px,0,0) rotate(-14deg)`;
       void deepEl.offsetWidth; // force reflow biar posisi luar-layar ke-apply dulu sebelum transisi nyala
       deepEl.style.transition = `transform ${OUT_MS}ms ease-out`;
       order.unshift(order.pop());
@@ -401,8 +401,8 @@ deck.addEventListener('pointermove', (e) => {
   const el = front();
   el.style.transform = `translate3d(${dx}px,${dy}px,0) rotate(${dx * 0.06}deg)`;
   const p = Math.min(1, Math.abs(dx) / THRESHOLD);
-  el.querySelector('.badge-next').style.opacity = dx < 0 ? p : 0;
-  el.querySelector('.badge-prev').style.opacity = dx > 0 ? p : 0;
+  el.querySelector('.badge-next').style.opacity = dx > 0 ? p : 0;
+  el.querySelector('.badge-prev').style.opacity = dx < 0 ? p : 0;
 });
 
 function endDrag(e, cancelled){
@@ -413,8 +413,8 @@ function endDrag(e, cancelled){
   resetAllBadges();
   const moved = Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy);
   if(cancelled) layout();
-  else if(dx < -THRESHOLD) nextCard();
-  else if(dx > THRESHOLD) prevCard();
+  else if(dx > THRESHOLD) nextCard();
+  else if(dx < -THRESHOLD) prevCard();
   else if(moved < TAP_SLOP) playFront(); // tap tanpa geser = putar
   else layout(); // geser kurang jauh: membal balik
   dx = 0;

@@ -90,8 +90,8 @@
   }
   .ctl:active{ transform:scale(.92); }
   .ctl-list{ color:var(--ink); border-color:var(--ink-soft); font-size:18px; }
-  .ctl-left{ color:var(--chili); border-color:var(--chili); }
-  .ctl-right{ color:var(--jade); border-color:var(--jade); }
+  .ctl-left{ color:var(--jade); border-color:var(--jade); }
+  .ctl-right{ color:var(--chili); border-color:var(--chili); }
   .ctl-play{ color:var(--gold); border-color:var(--gold); }
   .back-btn{
     background:var(--jade); color:#fff; border:none; border-radius:14px; padding:13px 22px;
@@ -139,8 +139,8 @@
 
   <div class="controls" id="ctlNormal">
     <button type="button" class="ctl ctl-list" id="btnList" aria-label="Daftar pertanyaan">☰</button>
-    <button type="button" class="ctl ctl-left" id="btnLeft" aria-label="Lewati (maju)">←</button>
-    <button type="button" class="ctl ctl-right" id="btnRight" aria-label="Balik (mundur)">→</button>
+    <button type="button" class="ctl ctl-left" id="btnLeft" aria-label="Balik (mundur)">←</button>
+    <button type="button" class="ctl ctl-right" id="btnRight" aria-label="Lewati (maju)">→</button>
     <button type="button" class="ctl ctl-play" id="btnPlay" aria-label="Putar video">▶</button>
   </div>
   <div class="controls" id="ctlPlaying" hidden>
@@ -422,8 +422,8 @@ function endDrag(e, cancelled){
 deck.addEventListener('pointerup', (e) => endDrag(e, false));
 deck.addEventListener('pointercancel', (e) => endDrag(e, true));
 
-document.getElementById('btnLeft').addEventListener('click', nextCard);
-document.getElementById('btnRight').addEventListener('click', prevCard);
+document.getElementById('btnLeft').addEventListener('click', prevCard);
+document.getElementById('btnRight').addEventListener('click', nextCard);
 document.getElementById('btnPlay').addEventListener('click', playFront);
 document.getElementById('btnBack').addEventListener('click', closeVideo);
 

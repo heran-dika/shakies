@@ -327,100 +327,6 @@ border:none;
 background:var(--white);
 }
 
-/* ===== LIGHTBOX (popup, dipake bareng sama Pick up Location) ===== */
-.lightbox-overlay{
-position:fixed;
-inset:0;
-background:rgba(31,56,100,0.72);
-display:flex;
-align-items:center;
-justify-content:center;
-padding:32px 20px;
-opacity:0;
-visibility:hidden;
-transition:opacity .2s ease, visibility .2s ease;
-z-index:60;
-}
-.lightbox-overlay.open{
-opacity:1;
-visibility:visible;
-}
-.lightbox-close{
-position:absolute;
-top:-14px;
-right:-14px;
-width:32px;
-height:32px;
-border-radius:50%;
-border:none;
-background:var(--navy);
-color:var(--white);
-font-size:16px;
-line-height:1;
-cursor:pointer;
-box-shadow:0 2px 8px rgba(0,0,0,0.35);
-}
-.lightbox-close:active{ transform:scale(0.94); }
-
-/* ===== MAP LIGHTBOX (popup peta Pick up Location, bisa digeser/zoom) ===== */
-.map-lightbox-inner{
-position:relative;
-width:100%;
-max-width:440px;
-background:var(--white);
-border-radius:16px;
-box-shadow:0 8px 30px rgba(0,0,0,0.4);
-overflow:hidden;
-display:flex;
-flex-direction:column;
-}
-.map-lightbox-inner iframe{
-display:block;
-width:100%;
-height:52vh;
-border:none;
-}
-.map-lightbox-action{
-padding:12px;
-flex:0 0 auto;
-display:flex;
-gap:8px;
-}
-.map-lightbox-action a,
-.map-lightbox-action button{
-display:block;
-flex:1;
-text-align:center;
-background:var(--pill);
-color:var(--navy);
-font-weight:700;
-font-size:0.9rem;
-text-decoration:none;
-padding:12px 8px;
-border-radius:14px;
-box-shadow:0 3px 0 var(--pill-shadow);
-border:none;
-font-family:inherit;
-cursor:pointer;
-}
-.map-lightbox-action a:active,
-.map-lightbox-action button:active{
-transform:translateY(2px);
-box-shadow:0 1px 0 var(--pill-shadow);
-}
-.map-lightbox-note{
-margin:0;
-padding:0 14px 14px;
-font-size:11.5px;
-line-height:1.45;
-color:var(--navy-soft);
-text-align:center;
-}
-.map-lightbox-inner .lightbox-close{
-top:10px;
-right:10px;
-z-index:2;
-}
 /* ===== Hero hotspot easter egg (tap pintu/orang/logo -> toast lucu) ===== */
 .hero-hotspot{
 position:absolute;
@@ -534,7 +440,7 @@ animation: sprinkleFly .55s ease-out forwards;
 </span>
 </a>
 
-<a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" href="?open=pickup" target="_blank" rel="noopener">
+<a class="link-btn" id="pickupBtn" data-umami-event="click_pickup_location" data-sheet-src="pickup.html" data-sheet-title="Pick up Location" href="pickup.html" target="_blank" rel="noopener">
 <span class="icon-badge"><span class="emoji">📍</span></span>
 <span class="link-text">
 <span class="title">Pick up Location</span>
@@ -593,18 +499,6 @@ animation: sprinkleFly .55s ease-out forwards;
 <iframe id="menuSheetFrame" title="Today's Menu"></iframe>
 </div>
 
-<div class="lightbox-overlay" id="pickupOverlay">
-<div class="map-lightbox-inner">
-<button class="lightbox-close" id="pickupClose" aria-label="Tutup">✕</button>
-<iframe src="https://www.google.com/maps?q=-6.2708882,106.9705108&z=17&output=embed" title="Lokasi Shakies" loading="lazy" allowfullscreen></iframe>
-<div class="map-lightbox-action">
-<a data-umami-event="click_pickup_maps" href="https://www.google.com/maps/place/SHAKIES/@-6.2708882,106.9705108,17z/data=!3m1!4b1!4m6!3m5!1s0x2e698dab46fe07e3:0xaa4eb78bdda773a!8m2!3d-6.2708882!4d106.9705108!16s%2Fg%2F11ydntrgmx" target="_blank" rel="noopener">Buka di Maps</a>
-<button type="button" id="copyAddressBtn" data-umami-event="click_pickup_copy_address">Salin Alamat</button>
-</div>
-<p class="map-lightbox-note">Untuk Shopee kirim & GoSend, titik lokasi biasanya udah pas dan bisa langsung dipilih. Kalau pakai Grab, titiknya kadang masih agak meleset — pastiin alamat detail di atas ditulis manual biar drivernya nggak nyasar.</p>
-</div>
-</div>
-
 </div>
 
 <script>
@@ -655,7 +549,7 @@ toggleIcon.classList.add('icon-spin');
 setTimeout(() => { toggleIcon.textContent = isNight ? '☀️' : '🌙'; }, 200);
 });
 
-// ===== Param ?open=... & ?faq=... (dibaca sekali di sini, dipakai bareng sheet & lightbox di bawah) =====
+// ===== Param ?open=... & ?faq=... (dibaca sekali di sini, dipakai sheet di bawah) =====
 // Cuma key 'open'/'faq' yang dibuang dari URL — parameter lain (mis. UTM) tetap dipertahankan,
 // biar nggak kepotong sebelum sempat kebaca script Umami (defer, jalan setelah blok ini).
 // 'faq' dipake khusus link share dari Tanya Baby Chef, biar video tertentu langsung maju ke depan.
@@ -693,8 +587,7 @@ history.replaceState(null, '', location.pathname + (rest ? '?' + rest : ''));
 }, 1500);
 });
 
-// Helper reusable buat copy-to-clipboard, dipake sama Pick up Location (Salin Alamat)
-// dan tombol share di Tanya Baby Chef -- 1 fungsi, 2 pemakai, daripada duplikat logic fallback-nya.
+// Helper reusable buat copy-to-clipboard, dipakai tombol share Tanya Baby Chef.
 async function copyToClipboard(text){
 if(navigator.clipboard && window.isSecureContext){
 await navigator.clipboard.writeText(text);
@@ -772,6 +665,10 @@ if(e.key === 'Escape') closeSheet();
 window.addEventListener('message', (e) => {
 if(e.data === 'shakies-menu-close') closeSheet();
 if(e.data && e.data.type === 'shakies-baby-chef-front') babyChefFrontVideoId = e.data.videoId;
+// Event Umami dari pickup.html (script Umami cuma ada di halaman ini). Hanya terima dari iframe sheet yang lagi dipakai.
+if(e.source === frame.contentWindow && e.data && e.data.type === 'shakies-track' && typeof e.data.event === 'string' && e.data.event.startsWith('click_pickup_') && window.umami){
+window.umami.track(e.data.event);
+}
 });
 
 // ---- Geser ke bawah di handle/header buat nutup KERTASNYA AJA (bukan ikut
@@ -813,7 +710,8 @@ zone.addEventListener('touchcancel', dragEnd);
 // otomatis biar animasi slide-up-nya tetep keliatan ----
 const SHEET_MAP = {
 menu: { src: 'menu.html', title: "Today's Menu" },
-'baby-chef': { src: 'baby-chef.html', title: 'Tanya Baby Chef' }
+'baby-chef': { src: 'baby-chef.html', title: 'Tanya Baby Chef' },
+pickup: { src: 'pickup.html', title: 'Pick up Location' }
 };
 if(SHEET_MAP[pendingOpen]){
 const target = SHEET_MAP[pendingOpen];
@@ -821,59 +719,6 @@ const target = SHEET_MAP[pendingOpen];
 // biar video itu yang dimajuin ke depan tumpukan pas kertas kebuka.
 const src = (pendingOpen === 'baby-chef' && pendingFaq) ? `${target.src}?faq=${encodeURIComponent(pendingFaq)}` : target.src;
 window.addEventListener('load', () => setTimeout(() => openSheet(src, target.title), 350));
-}
-})();
-
-// ===== Pick up Location lightbox (peta interaktif, bisa digeser/zoom) =====
-(function(){
-const pickupBtn = document.getElementById('pickupBtn');
-const pickupOverlay = document.getElementById('pickupOverlay');
-const pickupClose = document.getElementById('pickupClose');
-const copyAddressBtn = document.getElementById('copyAddressBtn');
-const PICKUP_ADDRESS = 'SHAKIES - Jl. Lotus Raya Blok D2 no.11A';
-
-async function copyAddress(){
-try{
-await copyToClipboard(PICKUP_ADDRESS);
-const original = copyAddressBtn.textContent;
-copyAddressBtn.textContent = 'Tersalin! ✓';
-copyAddressBtn.disabled = true;
-setTimeout(() => {
-copyAddressBtn.textContent = original;
-copyAddressBtn.disabled = false;
-}, 1500);
-} catch(e){
-alert('Alamat: ' + PICKUP_ADDRESS);
-}
-}
-copyAddressBtn.addEventListener('click', copyAddress);
-
-function openPickup(){
-pickupOverlay.classList.add('open');
-document.body.style.overflow = 'hidden';
-}
-function closePickup(){
-pickupOverlay.classList.remove('open');
-document.body.style.overflow = '';
-}
-
-pickupBtn.addEventListener('click', (e) => {
-// ctrl/cmd/shift/middle-click: buka landing page + popup (href=?open=pickup) di tab baru
-if(e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-e.preventDefault();
-openPickup();
-});
-pickupOverlay.addEventListener('click', (e) => {
-if(e.target === pickupOverlay) closePickup(); // klik bg gelap = nutup
-});
-pickupClose.addEventListener('click', closePickup);
-document.addEventListener('keydown', (e) => {
-if(e.key === 'Escape') closePickup();
-});
-
-// Link/QR langsung: index.html?open=pickup
-if(pendingOpen === 'pickup'){
-window.addEventListener('load', () => setTimeout(openPickup, 350));
 }
 })();
 

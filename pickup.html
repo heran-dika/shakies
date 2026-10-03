@@ -40,9 +40,9 @@
     position:absolute; inset:0; width:100%; height:100%; border:none; display:block;
     transition:opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1);
   }
-  /* Efek "masuk ke dalam peta": peta zoom-in + fade out, street view zoom-in dari agak gede + fade in */
+  /* Arah gerak konsisten: ke street view = semua membesar (zoom-in), balik ke peta = semua mengecil (zoom-out) */
   #mapFrame.out{ opacity:0; transform:scale(1.15); pointer-events:none; }
-  #streetFrame{ opacity:0; transform:scale(1.15); pointer-events:none; }
+  #streetFrame{ opacity:0; transform:scale(0.87); pointer-events:none; }
   #streetFrame.in{ opacity:1; transform:scale(1); pointer-events:auto; }
   @media (prefers-reduced-motion: reduce){ .map-wrap iframe{ transition:none; } }
 

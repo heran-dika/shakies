@@ -90,10 +90,10 @@ const tabMap = document.getElementById('tabMap');
 const tabStreet = document.getElementById('tabStreet');
 
 const TAB_STREET_LABEL = tabStreet.textContent;
-let streetLoaded = false, wantStreet = false;
+const FADE_MS = 500; // samain sama durasi transisi di CSS
+let streetLoaded = false, wantStreet = false, loadTimer = null;
 
 // Animasi baru jalan SETELAH iframe street view selesai load, biar nggak zoom ke layar kosong.
-// Iframe cuma di-load pas tab pertama kali dibuka (hemat data), abis itu tinggal toggle class.
 function applyStreet(on){
   mapFrame.classList.toggle('out', on);
   streetFrame.classList.toggle('in', on);
@@ -101,24 +101,39 @@ function applyStreet(on){
 function streetReady(){
   if(streetLoaded) return;
   streetLoaded = true;
+  clearTimeout(loadTimer);
   tabStreet.textContent = TAB_STREET_LABEL;
   if(wantStreet) applyStreet(true);
 }
+// (Re)load street view ke posisi & arah pandang awal (STREET_SRC). Dipakai buat load pertama
+// dan buat reset, karena set src ke URL yang sama maksa iframe navigasi ulang.
+function loadStreet(){
+  streetLoaded = false;
+  if(wantStreet) tabStreet.textContent = '⏳ Memuat…';
+  streetFrame.removeEventListener('load', streetReady);
+  streetFrame.addEventListener('load', streetReady, { once: true });
+  clearTimeout(loadTimer);
+  loadTimer = setTimeout(streetReady, 8000); // fallback kalau event load nggak kepanggil
+  streetFrame.src = STREET_SRC;
+}
 function showStreet(on){
+  const wasOn = wantStreet;
   wantStreet = on;
   tabMap.setAttribute('aria-selected', String(!on));
   tabStreet.setAttribute('aria-selected', String(on));
-  if(!on){ applyStreet(false); return; }
-  if(streetLoaded){ applyStreet(true); return; }
-  if(!streetFrame.getAttribute('src')){
-    tabStreet.textContent = '⏳ Memuat…';
-    streetFrame.addEventListener('load', streetReady, { once: true });
-    setTimeout(streetReady, 8000); // fallback kalau event load nggak kepanggil
-    streetFrame.src = STREET_SRC;
+  if(!on){
+    applyStreet(false);
+    // Reset diam-diam di belakang layar setelah fade-out kelar, biar pas dibuka lagi posisinya balik semula
+    if(streetLoaded) setTimeout(() => { if(!wantStreet) loadStreet(); }, FADE_MS + 50);
+    return;
   }
+  if(wasOn && streetLoaded){ loadStreet(); return; } // tab Street View ditekan lagi pas lagi aktif = balik ke posisi awal
+  if(streetLoaded){ applyStreet(true); return; }
+  if(!streetFrame.getAttribute('src')) loadStreet();
+  else tabStreet.textContent = '⏳ Memuat…'; // lagi loading (mis. reset di belakang layar belum kelar)
 }
 tabMap.addEventListener('click', () => showStreet(false));
-tabStreet.addEventListener('click', () => { showStreet(true); track('click_pickup_streetview'); });
+tabStreet.addEventListener('click', () => { const wasOn = wantStreet; showStreet(true); if(!wasOn) track('click_pickup_streetview'); });
 document.getElementById('mapsLink').addEventListener('click', () => track('click_pickup_maps'));
 
 async function copyText(text){

@@ -1,11 +1,37 @@
 {
   "categories": [
     {
+      "kategori": "Asian Bread",
+      "items": [
+        {
+          "nama": "Shokupan OG",
+          "harga": 50000
+        },
+        {
+          "nama": "Shokupan Beef And cheese",
+          "harga": 75000
+        }
+      ]
+    },
+    {
       "kategori": "Dessert & Cake",
       "items": [
         {
           "nama": "Burnt Cheese Cake",
           "harga": 33000
+        }
+      ]
+    },
+    {
+      "kategori": "Donut",
+      "items": [
+        {
+          "nama": "Pumpkin Donut Original",
+          "harga": 10000
+        },
+        {
+          "nama": "Donut Meses",
+          "harga": 15000
         }
       ]
     },
@@ -23,15 +49,32 @@
       ]
     },
     {
+      "kategori": "Salt Bread",
+      "items": [
+        {
+          "nama": "Salt Bread Original",
+          "harga": 16000
+        },
+        {
+          "nama": "Salt Bread Egg mayo",
+          "harga": 28000
+        }
+      ]
+    },
+    {
       "kategori": "Sourdough",
       "items": [
         {
           "nama": "Cranberry cream cheese (large)",
           "harga": 30000
+        },
+        {
+          "nama": "Gandum with orange and chocolate",
+          "harga": 15000
         }
       ]
     }
   ],
-  "publishedAt": "2026-10-06T06:06:32.351Z",
-  "publishedBy": "dika"
+  "publishedAt": "2026-10-11T12:35:49.748Z",
+  "publishedBy": "suci"
 }

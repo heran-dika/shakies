@@ -1,19 +1,6 @@
 {
   "categories": [
     {
-      "kategori": "Asian Bread",
-      "items": [
-        {
-          "nama": "Shokupan OG",
-          "harga": 50000
-        },
-        {
-          "nama": "Shokupan Beef And cheese",
-          "harga": 75000
-        }
-      ]
-    },
-    {
       "kategori": "Dessert & Cake",
       "items": [
         {
@@ -69,12 +56,12 @@
           "harga": 30000
         },
         {
-          "nama": "Gandum with orange and chocolate",
+          "nama": "Cranberry cream cheese (small)",
           "harga": 15000
         }
       ]
     }
   ],
-  "publishedAt": "2026-10-12T02:43:04.764Z",
+  "publishedAt": "2026-10-18T08:37:15.646Z",
   "publishedBy": "aca"
 }

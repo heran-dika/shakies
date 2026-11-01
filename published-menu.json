@@ -1,6 +1,19 @@
 {
   "categories": [
     {
+      "kategori": "Asian Bread",
+      "items": [
+        {
+          "nama": "Shokupan OG",
+          "harga": 50000
+        },
+        {
+          "nama": "Shokupan Beef And cheese",
+          "harga": 75000
+        }
+      ]
+    },
+    {
       "kategori": "Dessert & Cake",
       "items": [
         {
@@ -62,6 +75,6 @@
       ]
     }
   ],
-  "publishedAt": "2026-10-19T04:05:12.921Z",
-  "publishedBy": "aca"
+  "publishedAt": "2026-11-01T11:24:30.478Z",
+  "publishedBy": "suci"
 }

@@ -390,7 +390,7 @@ animation: sprinkleFly .55s ease-out forwards;
 position:absolute;
 z-index:4;
 left:50.65%;
-top:54%;
+top:calc(54% - 24px); /* naik persis setinggi tombol (24px): garis bawah baru = garis atas lama */
 transform:translate(-50%,-50%);
 display:flex;
 align-items:center;

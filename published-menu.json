@@ -10,15 +10,10 @@
         {
           "nama": "Shokupan Beef And cheese",
           "harga": 75000
-        }
-      ]
-    },
-    {
-      "kategori": "Dessert & Cake",
-      "items": [
+        },
         {
-          "nama": "Burnt Cheese Cake",
-          "harga": 33000
+          "nama": "Shokupan Gandum",
+          "harga": 50000
         }
       ]
     },
@@ -49,6 +44,19 @@
       ]
     },
     {
+      "kategori": "Food",
+      "items": [
+        {
+          "nama": "Dimsum Mentai",
+          "harga": 40000
+        },
+        {
+          "nama": "Dimsum mentai paket berdua",
+          "harga": 104000
+        }
+      ]
+    },
+    {
       "kategori": "Salt Bread",
       "items": [
         {
@@ -71,10 +79,23 @@
         {
           "nama": "Cranberry cream cheese (small)",
           "harga": 16000
+        },
+        {
+          "nama": "Gandum with orange and chocolate",
+          "harga": 15000
+        }
+      ]
+    },
+    {
+      "kategori": "Soft cookies",
+      "items": [
+        {
+          "nama": "OG",
+          "harga": 15000
         }
       ]
     }
   ],
-  "publishedAt": "2026-11-01T11:24:30.478Z",
+  "publishedAt": "2026-11-15T12:03:40.935Z",
   "publishedBy": "suci"
 }

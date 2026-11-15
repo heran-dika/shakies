@@ -79,10 +79,6 @@
         {
           "nama": "Cranberry cream cheese (small)",
           "harga": 16000
-        },
-        {
-          "nama": "Gandum with orange and chocolate",
-          "harga": 15000
         }
       ]
     },
@@ -96,6 +92,6 @@
       ]
     }
   ],
-  "publishedAt": "2026-11-15T12:03:40.935Z",
+  "publishedAt": "2026-11-15T12:04:08.208Z",
   "publishedBy": "suci"
 }
